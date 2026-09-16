@@ -1,0 +1,309 @@
+/* Consolidated UI Components - Pure CSS Version - Safari Fixed */
+
+/* CSS Variables First */
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --error: #ef4444;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1.5rem;
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Glass Components */
+.glass-nav {
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-nav {
+    background: rgba(17, 24, 39, 0.8);
+    border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+}
+
+.glass-card,
+.glass-hero {
+    background: rgba(255, 255, 255, 0.85);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .glass-card,
+.dark .glass-hero {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.glass-card:hover,
+.glass-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Buttons - All Variants */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+}
+
+.btn-secondary {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+}
+
+.dark .btn-secondary {
+    background: var(--gray-800);
+    color: var(--gray-200);
+    border-color: var(--gray-700);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-200);
+}
+
+.dark .btn-secondary:hover {
+    background: var(--gray-700);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.75rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    color: var(--gray-500);
+}
+
+.dark .form-label {
+    color: var(--gray-400);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--gray-200);
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-weight: 400;
+    background: white;
+    color: var(--gray-800);
+}
+
+.dark .form-control {
+    background: var(--gray-800);
+    border-color: var(--gray-700);
+    color: var(--gray-100);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.form-control.border-error {
+    border-color: var(--error);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.badge-success,
+.badge-low {
+    background: linear-gradient(to right, #10b981, #059669);
+    color: white;
+}
+
+.badge-warning,
+.badge-pending,
+.badge-medium {
+    background: linear-gradient(to right, #f59e0b, #d97706);
+    color: white;
+}
+
+.badge-error,
+.badge-high,
+.badge-critical {
+    background: linear-gradient(to right, #ef4444, #dc2626);
+    color: white;
+}
+
+.badge-info,
+.badge-scanning {
+    background: linear-gradient(to right, #06b6d4, #0891b2);
+    color: white;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+/* Spinners */
+.spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 4px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: relative;
+}
+
+.loading-overlay.loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+}
+
+.loading-overlay.loading::before {
+    content: attr(data-loading-text, 'Loading...');
+    position: absolute;
+    font-size: 1.125rem;
+    font-weight: 600;
+    z-index: 20;
+}
+
+/* Container */
+.container-custom {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .container-custom {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container-custom {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+/* Stat Cards */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 30px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Skeleton */
+.skeleton {
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.dark .skeleton {
+    background: linear-gradient(90deg, var(--gray-700) 25%, var(--gray-600) 50%, var(--gray-700) 75%);
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
