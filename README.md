@@ -213,6 +213,19 @@ Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumn
 
 ---
 
+## Deploy
+
+Sudah tersedia `Dockerfile`, `fly.toml`, dan `docker-compose.yml`. Satu image dipakai tiga proses: web, queue worker, dan scheduler.
+
+```bash
+docker compose up --build     # jalankan versi production di komputer sendiri
+fly deploy                    # atau ke Fly.io
+```
+
+Panduan lengkap untuk **Railway** dan **Fly.io**, termasuk daftar variabel dan checklist setelah deploy: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+
+> Platform yang hanya menjalankan satu proses web (Vercel, Netlify, shared hosting) tidak cocok, karena scan dikerjakan oleh worker terpisah.
+
 ## Teknologi
 
 **Laravel 12** · **PHP 8.2+** · MySQL/MariaDB atau SQLite · antrean berbasis database · Blade dengan design system sendiri (tanpa framework CSS) · PHPUnit · GitHub Actions

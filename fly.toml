@@ -1,0 +1,56 @@
+# Fly.io deployment. Rename `app` before the first deploy:
+#   fly launch --no-deploy --copy-config
+# Secrets (APP_KEY, DB_*, MAIL_*) are set with `fly secrets set`, never here.
+
+app = "api-security-scanner"
+primary_region = "sin"
+
+[build]
+
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  APP_LOCALE = "id"
+  APP_TIMEZONE = "Asia/Jakarta"
+  LOG_CHANNEL = "stderr"
+  LOG_LEVEL = "info"
+  SESSION_DRIVER = "database"
+  SESSION_SECURE_COOKIE = "true"
+  QUEUE_CONNECTION = "database"
+  CACHE_STORE = "database"
+  SCANNER_ALLOW_PRIVATE = "false"
+  SERVER_NAME = ":8080"
+
+# One image, three roles.
+[processes]
+  app = "frankenphp php-server --root /app/public --listen :8080"
+  worker = "php artisan queue:work --tries=1 --timeout=90 --sleep=3 --max-time=3600"
+  cron = "php artisan schedule:work"
+
+[deploy]
+  release_command = "php artisan migrate --force"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/up"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["worker", "cron"]
