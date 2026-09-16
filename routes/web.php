@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/scan-all', [TicketScanController::class, 'scanAll'])->middleware('throttle:3,1')->name('tickets.scan-all');
     Route::post('/tickets/{ticket}/scan', [TicketScanController::class, 'scan'])->middleware('throttle:10,1')->name('tickets.scan');
     Route::get('/tickets/{ticket}/scans', [TicketScanController::class, 'history'])->name('tickets.scans');
+    Route::get('/tickets/{ticket}/compare', [TicketScanController::class, 'compare'])->name('tickets.compare');
     Route::get('/tickets/{ticket}/report', [TicketScanController::class, 'report'])->name('tickets.report');
     Route::get('/tickets/{ticket}/print', [TicketScanController::class, 'print'])->name('tickets.print');
 });

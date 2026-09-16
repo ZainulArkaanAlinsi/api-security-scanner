@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ScanTicketJob;
+use App\Models\Scan;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -68,6 +69,89 @@ class TicketScanController extends Controller
             'ticket' => $ticket,
             'scans' => $ticket->scans()->orderByDesc('id')->paginate(25),
         ]);
+    }
+
+    /**
+     * Two scans side by side: which checks were fixed, which broke, and which
+     * stayed the same. Defaults to the two most recent successful scans.
+     */
+    public function compare(Request $request, Ticket $ticket)
+    {
+        Gate::authorize('view', $ticket);
+
+        $scans = $ticket->scans()->where('status', 'completed')->orderByDesc('id')->get();
+
+        if ($scans->count() < 2) {
+            return redirect()->route('tickets.show', $ticket)
+                ->with('error', 'Perbandingan butuh minimal dua scan yang berhasil.');
+        }
+
+        $before = $scans->firstWhere('id', $request->integer('before')) ?? $scans[1];
+        $after = $scans->firstWhere('id', $request->integer('after')) ?? $scans[0];
+
+        // Always read left to right in time order, whichever way they were picked.
+        if ($before->id > $after->id) {
+            [$before, $after] = [$after, $before];
+        }
+
+        $rows = $this->diffChecks($before, $after);
+
+        return view('tickets.compare', [
+            'ticket' => $ticket,
+            'scans' => $scans,
+            'before' => $before,
+            'after' => $after,
+            'rows' => $rows,
+            'summary' => [
+                'fixed' => $rows->where('change', 'fixed')->count(),
+                'broken' => $rows->where('change', 'broken')->count(),
+                'unchanged' => $rows->whereIn('change', ['still-failing', 'still-passing'])->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    private function diffChecks(Scan $before, Scan $after)
+    {
+        $left = collect($before->result['checks'] ?? [])->keyBy('label');
+        $right = collect($after->result['checks'] ?? [])->keyBy('label');
+
+        return $left->keys()
+            ->merge($right->keys())
+            ->unique()
+            ->map(function (string $label) use ($left, $right) {
+                $a = $left->get($label);
+                $b = $right->get($label);
+
+                $passedBefore = $a['passed'] ?? null;
+                $passedAfter = $b['passed'] ?? null;
+
+                $change = match (true) {
+                    $passedBefore === null => 'added',
+                    $passedAfter === null => 'removed',
+                    ! $passedBefore && $passedAfter => 'fixed',
+                    $passedBefore && ! $passedAfter => 'broken',
+                    $passedAfter => 'still-passing',
+                    default => 'still-failing',
+                };
+
+                return [
+                    'label' => $label,
+                    'category' => $b['category'] ?? $a['category'] ?? '',
+                    'before' => $passedBefore,
+                    'after' => $passedAfter,
+                    'change' => $change,
+                    'severity' => $b['severity'] ?? $a['severity'] ?? null,
+                    'detail' => $b['detail'] ?? '',
+                ];
+            })
+            // Changes first, then the checks that stayed the same.
+            ->sortBy(fn (array $row) => match ($row['change']) {
+                'broken' => 0, 'fixed' => 1, 'added' => 2, 'removed' => 3, 'still-failing' => 4, default => 5,
+            })
+            ->values();
     }
 
     public function report(Ticket $ticket)

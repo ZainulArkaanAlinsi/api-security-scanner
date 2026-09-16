@@ -144,7 +144,7 @@ class ScanHistoryTest extends TestCase
 
         $this->actingAs($user)->get(route('tickets.show', $ticket))
             ->assertOk()
-            ->assertSee('Lihat semua 30 scan');
+            ->assertSee('Lihat semua 30');
 
         $this->actingAs($user)->get(route('tickets.scans', $ticket))
             ->assertOk()

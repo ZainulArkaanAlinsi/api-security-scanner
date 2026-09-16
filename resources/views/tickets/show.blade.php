@@ -334,13 +334,14 @@
             <div class="card">
                 <div class="card-head">
                     <h2>Riwayat scan</h2>
-                    @if ($historyTotal > $history->count())
-                        <a class="link" href="{{ route('tickets.scans', $ticket) }}" style="font-size:0.8rem">
-                            Lihat semua {{ $historyTotal }} scan
-                        </a>
-                    @else
-                        <span class="faint" style="font-size:0.8rem">{{ $historyTotal }} scan</span>
-                    @endif
+                    <span class="row" style="gap:1rem;font-size:0.8rem">
+                        <a class="link" href="{{ route('tickets.compare', $ticket) }}">Bandingkan</a>
+                        @if ($historyTotal > $history->count())
+                            <a class="link" href="{{ route('tickets.scans', $ticket) }}">Lihat semua {{ $historyTotal }}</a>
+                        @else
+                            <span class="faint">{{ $historyTotal }} scan</span>
+                        @endif
+                    </span>
                 </div>
                 @php
                     $trend = $history->reverse()->values();

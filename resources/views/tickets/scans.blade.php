@@ -31,7 +31,10 @@
     <div class="card">
         <div class="card-head">
             <h2>Semua scan</h2>
-            <span class="faint" style="font-size:0.8rem">{{ $scans->total() }} total</span>
+            <span class="row" style="gap:1rem;font-size:0.8rem">
+                <a class="link" href="{{ route('tickets.compare', $ticket) }}">Bandingkan</a>
+                <span class="faint">{{ $scans->total() }} total</span>
+            </span>
         </div>
 
         @forelse ($scans as $scan)

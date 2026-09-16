@@ -107,6 +107,12 @@ Setiap temuan mengurangi skor: **critical −45, high −22, medium −9, low �
 
 Skor disimpan di setiap scan, jadi grafik tren di halaman ticket memperlihatkan apakah keamanan API-mu membaik atau memburuk.
 
+### Bandingkan dua scan
+
+Pilih dua tanggal, lihat persis apa yang berubah: perubahan skor, pemeriksaan yang **diperbaiki**, yang **memburuk**, dan yang tetap sama. Baris yang berubah ditaruh paling atas, lengkap dengan alasan kegagalannya.
+
+<img src="docs/screenshots/compare-scans.jpg" alt="Perbandingan dua scan berdampingan" width="820">
+
 ---
 
 ## Fitur
@@ -117,7 +123,7 @@ Skor disimpan di setiap scan, jadi grafik tren di halaman ticket memperlihatkan 
 | 💯 **Skor & grade** | Nilai 0–100 dengan grade A–F, rata-rata seluruh endpoint di dashboard |
 | 📥 **Import OpenAPI** | Tempel satu URL spec, semua endpoint GET jadi ticket dan bisa langsung di-scan |
 | ⚡ **Antrean** | Scan dikerjakan worker di latar belakang, request web tidak pernah menunggu |
-| 📈 **Riwayat & perbandingan** | Grafik tren skor, daftar temuan yang sudah diperbaiki dan yang baru muncul |
+| 📈 **Riwayat & perbandingan** | Grafik tren skor, dan perbandingan dua scan berdampingan per pemeriksaan |
 | 🔔 **Monitoring otomatis** | Scan ulang tiap 6 jam, email peringatan hanya untuk temuan high/critical yang benar-benar baru |
 | 🔗 **Link laporan publik** | Bagikan hasil scan lewat URL rahasia, tanpa perlu akun. Bisa dimatikan kapan saja |
 | 🏷️ **Badge skor** | SVG bergaya shields.io berisi grade API-mu, siap ditempel di README proyek |
