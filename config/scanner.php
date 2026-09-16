@@ -71,6 +71,12 @@ return [
     'rate_limit_probe_requests' => (int) env('SCANNER_RATE_LIMIT_PROBE', 6),
 
     /*
+    | Maximum endpoints created from a single OpenAPI document.
+    */
+
+    'import_limit' => (int) env('SCANNER_IMPORT_LIMIT', 50),
+
+    /*
     | Responses slower than this (milliseconds) are reported as a finding.
     */
 

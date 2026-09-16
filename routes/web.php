@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketImportController;
 use App\Http\Controllers\TicketScanController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/tickets/export', [TicketController::class, 'export'])->name('tickets.export');
+    Route::get('/tickets/import', [TicketImportController::class, 'create'])->name('tickets.import');
+    Route::post('/tickets/import', [TicketImportController::class, 'store'])->middleware('throttle:5,1');
     Route::resource('tickets', TicketController::class);
     Route::patch('/tickets/{ticket}/monitoring', [TicketScanController::class, 'monitoring'])->name('tickets.monitoring');
     Route::post('/tickets/{ticket}/scan', [TicketScanController::class, 'scan'])->middleware('throttle:10,1')->name('tickets.scan');

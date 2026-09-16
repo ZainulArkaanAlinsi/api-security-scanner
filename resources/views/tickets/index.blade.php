@@ -94,6 +94,7 @@
         @if ($stats['total'] > 0)
             <a href="{{ route('tickets.export', request()->query()) }}" class="btn btn-secondary">Unduh CSV</a>
         @endif
+        <a href="{{ route('tickets.import') }}" class="btn btn-secondary">Import OpenAPI</a>
         <a href="{{ route('tickets.create') }}" class="btn btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
             Scan baru
