@@ -449,7 +449,13 @@ class ApiScanner
                 return;
             }
 
-            if ($response->status() === 429 || $response->hasHeader('Retry-After')) {
+            // A quota header counts too: the limit exists, our burst was just
+            // far below it (GitHub allows 60/hour, we send six).
+            if ($response->status() === 429
+                || $response->hasHeader('Retry-After')
+                || $response->hasHeader('X-RateLimit-Limit')
+                || $response->hasHeader('RateLimit-Limit')
+                || $response->hasHeader('X-Rate-Limit-Limit')) {
                 $throttled = true;
                 break;
             }

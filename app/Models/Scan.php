@@ -13,6 +13,8 @@ class Scan extends Model
         'findings',
         'result',
         'error',
+        'score',
+        'grade',
     ];
 
     protected $casts = [

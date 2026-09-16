@@ -33,6 +33,17 @@
     .t-title { font-weight: 500; max-width: 340px; }
     .t-url { font-size: 0.78rem; color: var(--ink-faint); max-width: 340px; }
     .row-link { color: inherit; text-decoration: none; }
+    .grade-pill {
+        display: inline-grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--tone);
+        border: 1px solid var(--tone);
+        border-radius: 7px;
+    }
     .auto-tag {
         display: inline-block;
         margin-left: 0.35rem;
@@ -96,8 +107,16 @@
         <div class="stat-label">Total ticket</div>
     </div>
     <div class="stat">
-        <div class="stat-value">{{ $stats['completed'] }}</div>
-        <div class="stat-label">Sudah di-scan</div>
+        @if ($stats['score'] !== null)
+            @php $avg = (int) round($stats['score']); @endphp
+            <div class="stat-value" style="color: {{ $avg >= 80 ? 'var(--ok)' : ($avg >= 60 ? 'var(--sev-medium)' : 'var(--sev-high)') }}">
+                {{ $avg }}<span style="font-size:0.9rem;color:var(--ink-faint)">/100</span>
+            </div>
+            <div class="stat-label">Rata-rata skor · grade {{ \App\Services\SecurityScore::grade($avg) }}</div>
+        @else
+            <div class="stat-value faint">—</div>
+            <div class="stat-label">Rata-rata skor</div>
+        @endif
     </div>
     <div class="stat">
         <div class="stat-value">{{ $stats['pending'] }}</div>
@@ -181,6 +200,7 @@
                     <tr>
                         <th>Ticket</th>
                         <th>Status</th>
+                        <th>Skor</th>
                         <th>Risiko</th>
                         <th>Scan terakhir</th>
                         <th class="num"><span class="sr-only">Aksi</span></th>
@@ -201,6 +221,14 @@
                                 </a>
                             </td>
                             <td data-label="Status">@include('tickets.partials.status', ['status' => $ticket->status])</td>
+                            <td data-label="Skor">
+                                @if ($ticket->score !== null)
+                                    <span class="grade-pill" style="--tone: {{ $ticket->score >= 80 ? 'var(--ok)' : ($ticket->score >= 60 ? 'var(--sev-medium)' : 'var(--sev-high)') }}"
+                                        title="Skor {{ $ticket->score }}/100">{{ $ticket->grade }}</span>
+                                @else
+                                    <span class="faint">—</span>
+                                @endif
+                            </td>
                             <td data-label="Risiko">
                                 @if ($ticket->severity)
                                     <span class="sev sev-{{ $ticket->severity }}">{{ ucfirst($ticket->severity) }}</span>

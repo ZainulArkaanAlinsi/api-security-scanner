@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\SecurityScore;
 use Illuminate\Database\Seeder;
 
 /**
@@ -120,12 +121,16 @@ class DemoSeeder extends Seeder
 
             $scannedAt = now()->subDays($daysAgo)->subMinutes(random_int(5, 300));
             $severity = $findings[0]['severity'] ?? null;
+            $score = SecurityScore::calculate($findings);
+            $grade = SecurityScore::grade($score);
 
             $scan = $ticket->scans()->create([
                 'status' => 'completed',
                 'severity' => $severity,
                 'findings' => $findings,
                 'result' => $result,
+                'score' => $score,
+                'grade' => $grade,
             ]);
             $scan->forceFill(['created_at' => $scannedAt, 'updated_at' => $scannedAt])->save();
 
@@ -135,6 +140,8 @@ class DemoSeeder extends Seeder
                 'findings' => $findings,
                 'scan_result' => $result,
                 'scanned_at' => $scannedAt,
+                'score' => $score,
+                'grade' => $grade,
             ])->save();
         }
 

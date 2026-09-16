@@ -17,6 +17,8 @@ class Ticket extends Model
         'scan_result',
         'scanned_at',
         'auto_scan',
+        'score',
+        'grade',
     ];
 
     protected $casts = [

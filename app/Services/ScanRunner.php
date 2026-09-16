@@ -64,11 +64,16 @@ class ScanRunner
             return $scan;
         }
 
+        $score = SecurityScore::calculate($report['findings']);
+        $grade = SecurityScore::grade($score);
+
         $scan = $ticket->scans()->create([
             'status' => 'completed',
             'severity' => $report['severity'],
             'findings' => $report['findings'],
             'result' => $report['result'],
+            'score' => $score,
+            'grade' => $grade,
         ]);
 
         $ticket->update([
@@ -77,6 +82,8 @@ class ScanRunner
             'findings' => $report['findings'],
             'scan_result' => $report['result'],
             'scanned_at' => now(),
+            'score' => $score,
+            'grade' => $grade,
         ]);
 
         if ($notify) {
@@ -94,6 +101,8 @@ class ScanRunner
             'findings' => null,
             'scan_result' => ['error' => $message],
             'scanned_at' => now(),
+            'score' => null,
+            'grade' => null,
         ]);
     }
 

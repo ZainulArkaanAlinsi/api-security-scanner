@@ -78,6 +78,32 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
 
+    .score-card { display: flex; align-items: center; gap: 1.5rem; }
+    .score-ring {
+        flex: none;
+        width: 118px;
+        height: 118px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--tone) calc(var(--value) * 1%), var(--surface-2) 0);
+    }
+    .score-inner {
+        width: 92px;
+        height: 92px;
+        border-radius: 50%;
+        background: var(--surface);
+        display: grid;
+        place-items: center;
+        line-height: 1.1;
+    }
+    .score-grade { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; }
+    .score-value { font-size: 0.8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .score-max { color: var(--ink-faint); }
+    @media (max-width: 520px) {
+        .score-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
+
     .history { list-style: none; font-size: 0.85rem; }
     .history li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; padding: 0.6rem 1.25rem; border-bottom: 1px solid var(--line); }
     .history li:last-child { border-bottom: 0; }
@@ -129,6 +155,9 @@
             @if ($ticket->severity)
                 <span class="sev sev-{{ $ticket->severity }}">{{ ucfirst($ticket->severity) }}</span>
             @endif
+            @if ($ticket->grade)
+                <span class="badge" title="Skor keamanan {{ $ticket->score }}/100">Grade {{ $ticket->grade }}</span>
+            @endif
         </div>
         <h1 style="overflow-wrap:anywhere">{{ $ticket->title }}</h1>
         <p class="mono" style="overflow-wrap:anywhere">{{ $ticket->api_url }}</p>
@@ -177,6 +206,32 @@
                 </form>
             </div>
         @else
+            @if ($ticket->score !== null)
+            @php
+                $score = $ticket->score;
+                $tone = $score >= 80 ? 'var(--ok)' : ($score >= 60 ? 'var(--sev-medium)' : 'var(--sev-high)');
+            @endphp
+            <div class="card card-pad score-card">
+                <div class="score-ring" style="--value: {{ $score }}; --tone: {{ $tone }}" role="img"
+                    aria-label="Skor keamanan {{ $score }} dari 100, grade {{ $ticket->grade }}">
+                    <div class="score-inner">
+                        <span class="score-grade" style="color: {{ $tone }}">{{ $ticket->grade }}</span>
+                        <span class="score-value">{{ $score }}<span class="score-max">/100</span></span>
+                    </div>
+                </div>
+                <div>
+                    <h2>Skor keamanan</h2>
+                    <p class="muted" style="margin-top:0.35rem">{{ \App\Services\SecurityScore::verdict($score) }}</p>
+                    <div class="row" style="margin-top:0.9rem;gap:1.25rem">
+                        @foreach (['critical' => 'Critical', 'high' => 'High', 'medium' => 'Medium', 'low' => 'Low'] as $key => $label)
+                            @php $count = collect($ticket->findings ?? [])->where('severity', $key)->count(); @endphp
+                            <span class="sev sev-{{ $key }}">{{ $label }} <b style="margin-left:0.25rem;color:var(--ink)">{{ $count }}</b></span>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
             @if ($changes)
                 <div class="card">
                     <div class="card-head">
@@ -293,9 +348,9 @@
                 @endphp
                 <div class="trend" role="img" aria-label="Tren jumlah temuan dari scan lama ke terbaru">
                     @foreach ($trend as $scan)
-                        <div class="trend-col" title="{{ $scan->created_at->translatedFormat('d M H:i') }} — {{ $scan->status === 'failed' ? 'gagal' : count($scan->findings ?? []).' temuan' }}">
-                            <span style="height: {{ $scan->status === 'failed' ? 100 : max(8, count($scan->findings ?? []) / $maxFindings * 100) }}%;
-                                background: {{ $scan->status === 'failed' ? 'var(--line-strong)' : ($scan->severity ? 'var(--sev-'.$scan->severity.')' : 'var(--ok)') }}"></span>
+                        <div class="trend-col" title="{{ $scan->created_at->translatedFormat('d M H:i') }} — {{ $scan->status === 'failed' ? 'gagal' : 'skor '.$scan->score.' ('.$scan->grade.')' }}">
+                            <span style="height: {{ $scan->status === 'failed' ? 100 : max(8, $scan->score ?? 0) }}%;
+                                background: {{ $scan->status === 'failed' ? 'var(--line-strong)' : (($scan->score ?? 0) >= 80 ? 'var(--ok)' : (($scan->score ?? 0) >= 60 ? 'var(--sev-medium)' : 'var(--sev-high)')) }}"></span>
                         </div>
                     @endforeach
                 </div>
@@ -311,7 +366,7 @@
                                 @if ($scan->status === 'failed')
                                     <span class="badge badge-failed">Gagal</span>
                                 @else
-                                    <span class="faint">{{ count($scan->findings ?? []) }} temuan</span>
+                                    <span class="faint">skor {{ $scan->score }} · {{ count($scan->findings ?? []) }} temuan</span>
                                     @if ($scan->severity)
                                         <span class="sev sev-{{ $scan->severity }}">{{ ucfirst($scan->severity) }}</span>
                                     @else

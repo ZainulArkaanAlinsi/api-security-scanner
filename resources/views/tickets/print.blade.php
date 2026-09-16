@@ -137,8 +137,8 @@
 
         <dl class="summary">
             <div>
-                <dt>Risiko tertinggi</dt>
-                <dd>{{ $ticket->severity ? ucfirst($ticket->severity) : 'Tidak ada' }}</dd>
+                <dt>Skor keamanan</dt>
+                <dd>{{ $ticket->score }}/100 · Grade {{ $ticket->grade }}</dd>
             </div>
             <div>
                 <dt>Lolos pemeriksaan</dt>

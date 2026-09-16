@@ -40,6 +40,7 @@ class TicketController extends Controller
             'pending' => (int) ($statusCounts['pending'] ?? 0),
             'failed' => (int) ($statusCounts['failed'] ?? 0),
             'risky' => (int) (($severityCounts['high'] ?? 0) + ($severityCounts['critical'] ?? 0)),
+            'score' => $user->tickets()->whereNotNull('score')->avg('score'),
         ];
 
         return view('tickets.index', compact('tickets', 'stats', 'severityCounts', 'filters'));
