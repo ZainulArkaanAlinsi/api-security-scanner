@@ -13,6 +13,7 @@
 .env.production
 /graphify-out
 /public/_preview
+/laravel
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
