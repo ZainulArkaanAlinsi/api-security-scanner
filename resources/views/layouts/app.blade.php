@@ -169,6 +169,7 @@
             <nav class="nav" aria-label="Utama">
                 <a href="{{ route('tickets.index') }}" @if (request()->routeIs('tickets.index', 'tickets.show', 'tickets.edit')) aria-current="page" @endif>Dashboard</a>
                 <a href="{{ route('tickets.create') }}" @if (request()->routeIs('tickets.create')) aria-current="page" @endif>Scan baru</a>
+                <a href="{{ route('statistics') }}" @if (request()->routeIs('statistics')) aria-current="page" @endif>Statistik</a>
             </nav>
 
             <div class="topbar-right">

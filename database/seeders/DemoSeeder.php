@@ -102,9 +102,29 @@ class DemoSeeder extends Seeder
         foreach ($runs as $run) {
             [$daysAgo, $checks, $statusCode, $ms] = $run;
 
+            $categories = [
+                'Koneksi memakai HTTPS' => 'transport',
+                'Header Strict-Transport-Security' => 'transport',
+                'Sertifikat TLS berlaku lebih dari 14 hari' => 'transport',
+                'Header X-Content-Type-Options: nosniff' => 'header',
+                'Proteksi clickjacking' => 'header',
+                'Header Content-Security-Policy' => 'header',
+                'Konfigurasi CORS' => 'header',
+                'Versi software tidak terekspos' => 'header',
+                'Cookie memakai HttpOnly dan Secure' => 'cookie',
+                'Tidak ada error server (5xx)' => 'error-handling',
+                'Tidak ada stack trace atau pesan debug' => 'error-handling',
+                'Waktu respons di bawah 2 detik' => 'performance',
+            ];
+
             $findings = collect($checks)
                 ->reject(fn ($c) => $c['passed'])
-                ->map(fn ($c) => ['title' => $c['label'], 'severity' => $c['severity'], 'detail' => $c['detail']])
+                ->map(fn ($c) => [
+                    'title' => $c['label'],
+                    'severity' => $c['severity'],
+                    'detail' => $c['detail'],
+                    'category' => $categories[$c['label']] ?? 'config',
+                ])
                 ->sortByDesc(fn ($f) => ['low' => 1, 'medium' => 2, 'high' => 3, 'critical' => 4][$f['severity']])
                 ->values()
                 ->all();

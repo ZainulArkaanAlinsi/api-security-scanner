@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketImportController;
 use App\Http\Controllers\TicketScanController;
@@ -38,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('tickets.index');
     })->name('dashboard');
+
+    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
