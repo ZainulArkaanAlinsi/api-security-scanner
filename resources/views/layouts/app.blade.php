@@ -144,6 +144,8 @@
 </head>
 
 <body>
+    <a href="#main" class="skip-link">Lewati ke konten</a>
+
     <header class="topbar">
         <div class="container topbar-inner">
             <a href="{{ route('tickets.index') }}" class="brand">
@@ -183,7 +185,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="main">
         <div class="container">
             @if (session('success'))
                 <div class="alert alert-success flash" role="status">{{ session('success') }}</div>
@@ -195,6 +197,8 @@
             @yield('content')
         </div>
     </main>
+
+    <p id="busy-status" class="sr-only" role="status" aria-live="polite"></p>
 
     <footer class="footer">
         <div class="container">&copy; {{ date('Y') }} API Scanner</div>
@@ -213,19 +217,35 @@
             });
         });
 
+        // ...and on Escape, returning focus to the trigger.
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            document.querySelectorAll('details.menu[open]').forEach((menu) => {
+                menu.removeAttribute('open');
+                menu.querySelector('summary')?.focus();
+            });
+        });
+
         document.querySelectorAll('form[data-confirm]').forEach((form) => {
             form.addEventListener('submit', (event) => {
                 if (!confirm(form.dataset.confirm)) event.preventDefault();
             });
         });
 
+        // Keep the button focusable while it works: disabling it would drop focus
+        // to <body>, and a disabled control is not announced reliably.
         document.querySelectorAll('form[data-busy]').forEach((form) => {
             form.addEventListener('submit', () => {
                 const button = form.querySelector('button[type=submit]');
-                if (button) {
-                    button.disabled = true;
-                    button.textContent = form.dataset.busy;
-                }
+                if (!button) return;
+
+                button.setAttribute('aria-disabled', 'true');
+                button.style.pointerEvents = 'none';
+                button.style.opacity = '0.6';
+                button.textContent = form.dataset.busy;
+
+                const status = document.getElementById('busy-status');
+                if (status) status.textContent = form.dataset.busy;
             });
         });
     </script>

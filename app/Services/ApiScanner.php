@@ -34,7 +34,13 @@ class ApiScanner
             throw new ScanException('URL harus diawali http:// atau https:// dan memiliki nama host.');
         }
 
-        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
+        $port = (int) ($parts['port'] ?? ($scheme === 'https' ? 443 : 80));
+
+        // Without this the scanner doubles as an anonymous port prober.
+        if (! in_array($port, config('scanner.allowed_ports', [80, 443]), true)) {
+            throw new ScanException("Port {$port} tidak diizinkan. Scan hanya bisa ke port web standar (80 atau 443).");
+        }
+
         $ip = $this->resolve($host);
 
         $start = microtime(true);
@@ -43,8 +49,17 @@ class ApiScanner
             $response = Http::withOptions([
                 'allow_redirects' => false,
                 'verify' => config('scanner.ca_bundle') ?: true,
-                // Pin the connection to the IP we validated so DNS cannot be swapped mid-request.
-                'curl' => [CURLOPT_RESOLVE => [sprintf('%s:%d:%s', $host, $port, str_contains($ip, ':') ? "[{$ip}]" : $ip)]],
+                'curl' => [
+                    // Pin the connection to the IP we validated so DNS cannot be swapped mid-request.
+                    CURLOPT_RESOLVE => [sprintf('%s:%d:%s', $host, $port, str_contains($ip, ':') ? "[{$ip}]" : $ip)],
+                    // A hostile target must not be able to stream us out of memory.
+                    CURLOPT_MAXFILESIZE => config('scanner.max_response_bytes', 5 * 1024 * 1024),
+                    CURLOPT_BUFFERSIZE => 65536,
+                    CURLOPT_NOPROGRESS => false,
+                    CURLOPT_PROGRESSFUNCTION => function ($resource, $downloadSize, $downloaded) {
+                        return $downloaded > config('scanner.max_response_bytes', 5 * 1024 * 1024) ? 1 : 0;
+                    },
+                ],
             ])
                 ->withHeaders(['User-Agent' => 'APIScanner/1.0 (+security audit)'])
                 ->connectTimeout(5)
@@ -110,6 +125,14 @@ class ApiScanner
             $ips = [$host];
         } else {
             $ips = gethostbynamel($host) ?: [];
+
+            // gethostbynamel only returns A records; IPv6-only hosts are valid targets.
+            if ($ips === []) {
+                $ips = collect(@dns_get_record($host, DNS_AAAA) ?: [])
+                    ->pluck('ipv6')
+                    ->filter()
+                    ->all();
+            }
         }
 
         if ($ips === []) {

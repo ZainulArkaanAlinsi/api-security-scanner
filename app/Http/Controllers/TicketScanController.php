@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Services\ScanBusyException;
 use App\Services\ScanRunner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,7 +14,11 @@ class TicketScanController extends Controller
     {
         Gate::authorize('update', $ticket);
 
-        $scan = $runner->run($ticket);
+        try {
+            $scan = $runner->run($ticket);
+        } catch (ScanBusyException $e) {
+            return redirect()->route('tickets.show', $ticket)->with('error', $e->getMessage());
+        }
 
         if ($scan->status === 'failed') {
             return redirect()->route('tickets.show', $ticket)->with('error', $scan->error);

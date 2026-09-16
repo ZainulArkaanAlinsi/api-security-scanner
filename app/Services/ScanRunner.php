@@ -5,9 +5,15 @@ namespace App\Services;
 use App\Models\Scan;
 use App\Models\Ticket;
 use App\Notifications\ScanFindingsNotification;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ScanRunner
 {
+    /** A scan may not hold the lock longer than this. */
+    private const LOCK_SECONDS = 120;
+
     public function __construct(private ApiScanner $scanner) {}
 
     /**
@@ -15,11 +21,34 @@ class ScanRunner
      * When $notify is true the owner is emailed about high/critical findings that
      * were not in the previous scan — used by automated runs, where nobody is
      * watching the screen.
+     *
+     * @throws ScanBusyException when the same ticket is already being scanned
      */
     public function run(Ticket $ticket, bool $notify = false): Scan
     {
-        $previous = $ticket->scans()->where('status', 'completed')->orderByDesc('id')->first();
+        $lock = Cache::lock("scan-ticket-{$ticket->id}", self::LOCK_SECONDS);
 
+        if (! $lock->get()) {
+            throw new ScanBusyException('Ticket ini sedang di-scan. Tunggu sampai scan yang berjalan selesai.');
+        }
+
+        try {
+            return $this->perform($ticket, $notify);
+        } catch (Throwable $e) {
+            // Never leave a ticket stuck on "scanning" when something unexpected
+            // breaks mid-run: a database error, a killed worker, or a bug.
+            $this->recordFailure($ticket, 'Scan berhenti karena kesalahan tak terduga. Silakan coba lagi.');
+
+            Log::error('Scan crashed', ['ticket_id' => $ticket->id, 'exception' => $e]);
+
+            throw $e;
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function perform(Ticket $ticket, bool $notify): Scan
+    {
         $ticket->update(['status' => 'scanning']);
 
         try {
@@ -30,13 +59,7 @@ class ScanRunner
                 'error' => $e->getMessage(),
             ]);
 
-            $ticket->update([
-                'status' => 'failed',
-                'severity' => null,
-                'findings' => null,
-                'scan_result' => ['error' => $e->getMessage()],
-                'scanned_at' => now(),
-            ]);
+            $this->recordFailure($ticket, $e->getMessage());
 
             return $scan;
         }
@@ -57,25 +80,45 @@ class ScanRunner
         ]);
 
         if ($notify) {
-            $this->notifyAboutNewRisks($ticket, $scan, $previous);
+            $this->notifyAboutNewRisks($ticket, $scan);
         }
 
         return $scan;
     }
 
-    private function notifyAboutNewRisks(Ticket $ticket, Scan $scan, ?Scan $previous): void
+    private function recordFailure(Ticket $ticket, string $message): void
     {
-        $known = $previous ? $previous->findingTitles() : [];
+        $ticket->update([
+            'status' => 'failed',
+            'severity' => null,
+            'findings' => null,
+            'scan_result' => ['error' => $message],
+            'scanned_at' => now(),
+        ]);
+    }
 
-        $serious = collect($scan->findings ?? [])
-            ->whereIn('severity', ['high', 'critical'])
-            ->reject(fn (array $finding) => in_array($finding['title'], $known, true))
-            ->values();
+    private function notifyAboutNewRisks(Ticket $ticket, Scan $scan): void
+    {
+        $serious = collect($scan->findings ?? [])->whereIn('severity', ['high', 'critical']);
 
         if ($serious->isEmpty()) {
             return;
         }
 
-        $ticket->user->notify(new ScanFindingsNotification($ticket, $serious->all()));
+        $previous = $ticket->scans()
+            ->where('status', 'completed')
+            ->where('id', '<', $scan->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $known = $previous ? $previous->findingTitles() : [];
+
+        $new = $serious->reject(fn (array $finding) => in_array($finding['title'], $known, true))->values();
+
+        if ($new->isEmpty()) {
+            return;
+        }
+
+        $ticket->user->notify(new ScanFindingsNotification($ticket, $new->all()));
     }
 }

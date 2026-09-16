@@ -17,7 +17,9 @@ Aplikasi web Laravel untuk mengaudit konfigurasi keamanan endpoint API. Tambahka
 - **Dashboard**: statistik, distribusi risiko, pencarian, filter status & risiko
 - **Akun**: register, login (dibatasi 5 percobaan/menit), lupa & reset password, profil, ganti password, hapus akun
 - **Keamanan aplikasi**
-  - Proteksi SSRF: localhost, IP privat, dan alamat metadata cloud tidak bisa di-scan; koneksi dikunci ke IP yang sudah divalidasi
+  - Proteksi SSRF: localhost, IP privat, dan alamat metadata cloud tidak bisa di-scan; koneksi dikunci ke IP yang sudah divalidasi dan redirect tidak diikuti
+  - Scan dibatasi ke port 80/443 dan respons dipotong di 5 MB, jadi scanner tidak bisa dipakai sebagai port prober atau dijadikan alat menghabiskan memori server
+  - Satu ticket tidak bisa di-scan dua kali bersamaan, dan kegagalan tak terduga tidak meninggalkan ticket berstatus menggantung
   - Setiap user hanya bisa mengakses ticket miliknya (akses ke ticket orang lain → 404)
   - Rate limit pada login, register, reset password, dan scan
 - Mode terang/gelap, halaman error kustom (403, 404, 419, 429, 500)
@@ -91,6 +93,20 @@ php artisan scan:due --limit=5       # batasi jumlah per run
 ```
 
 Email peringatan hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumnya**, jadi tidak ada email berulang untuk masalah yang sama.
+
+## Checklist sebelum deploy
+
+Aplikasi ini mengaudit keamanan orang lain, jadi konfigurasinya sendiri harus benar:
+
+- [ ] `APP_ENV=production`, `APP_DEBUG=false` (mode debug membocorkan stack trace dan isi env ke pengunjung)
+- [ ] `APP_KEY` dibuat ulang dengan `php artisan key:generate`
+- [ ] `APP_URL` diisi domain sebenarnya (dipakai link di email reset password dan notifikasi)
+- [ ] `SESSION_SECURE_COOKIE=true` saat memakai HTTPS
+- [ ] `SCANNER_ALLOW_PRIVATE=false` (nilai default; jangan diaktifkan di server publik)
+- [ ] Konfigurasi SMTP diisi, jangan biarkan `MAIL_MAILER=log`
+- [ ] Jangan jalankan `DemoSeeder` di production
+
+Header keamanan (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, CSP, dan HSTS saat HTTPS) sudah dipasang otomatis oleh `app/Http/Middleware/SecurityHeaders.php`.
 
 ## Menjalankan test
 

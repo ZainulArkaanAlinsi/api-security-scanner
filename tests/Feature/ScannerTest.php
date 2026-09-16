@@ -44,12 +44,24 @@ class ScannerTest extends TestCase
     {
         Http::fake();
 
-        foreach (['http://127.0.0.1/admin', 'http://localhost:8080', 'http://192.168.1.10/api', 'http://169.254.169.254/latest/meta-data'] as $url) {
+        foreach (['http://127.0.0.1/admin', 'http://localhost/', 'http://192.168.1.10/api', 'http://169.254.169.254/latest/meta-data'] as $url) {
             $ticket = $this->scan($url);
 
             $this->assertSame('failed', $ticket->status, $url);
             $this->assertStringContainsString('tidak boleh di-scan', $ticket->scan_result['error']);
         }
+
+        Http::assertNothingSent();
+    }
+
+    public function test_non_standard_ports_are_rejected(): void
+    {
+        Http::fake();
+
+        $ticket = $this->scan('http://8.8.8.8:8080/api');
+
+        $this->assertSame('failed', $ticket->status);
+        $this->assertStringContainsString('Port 8080 tidak diizinkan', $ticket->scan_result['error']);
 
         Http::assertNothingSent();
     }

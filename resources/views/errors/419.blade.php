@@ -5,6 +5,6 @@
 @section('message', 'Halaman terlalu lama dibiarkan terbuka sehingga formulir kedaluwarsa. Muat ulang halaman lalu kirim lagi.')
 
 @section('actions')
-    <a href="javascript:history.back()" class="btn btn-primary">Kembali ke formulir</a>
+    <button type="button" class="btn btn-primary" onclick="history.back()">Kembali ke formulir</button>
     <a href="{{ url('/') }}" class="btn btn-ghost">Ke halaman utama</a>
 @endsection

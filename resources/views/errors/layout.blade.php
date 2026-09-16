@@ -48,7 +48,7 @@
                         @yield('actions')
                     @else
                         <a href="{{ url('/') }}" class="btn btn-primary">Ke halaman utama</a>
-                        <a href="javascript:history.back()" class="btn btn-ghost">Kembali</a>
+                        <button type="button" class="btn btn-ghost" onclick="history.back()">Kembali</button>
                     @endif
                 </div>
             </div>

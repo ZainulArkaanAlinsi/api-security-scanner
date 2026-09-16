@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Ticket;
+use App\Services\ScanBusyException;
 use App\Services\ScanRunner;
 use Illuminate\Console\Command;
 
@@ -30,7 +31,13 @@ class ScanDueTickets extends Command
         }
 
         foreach ($tickets as $ticket) {
-            $scan = $runner->run($ticket, notify: true);
+            try {
+                $scan = $runner->run($ticket, notify: true);
+            } catch (ScanBusyException $e) {
+                $this->line("  [lewat]   #{$ticket->id} {$ticket->title} — sedang di-scan proses lain");
+
+                continue;
+            }
 
             $this->line(match ($scan->status) {
                 'failed' => "  [gagal]   #{$ticket->id} {$ticket->title} — {$scan->error}",

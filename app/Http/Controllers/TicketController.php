@@ -56,7 +56,8 @@ class TicketController extends Controller
             'severity' => 'nullable|in:low,medium,high,critical',
         ]);
 
-        $tickets = $this->filtered($request, $filters)->latest();
+        // Ordered by id so chunking stays deterministic while rows are written.
+        $tickets = $this->filtered($request, $filters)->orderByDesc('id');
         $filename = 'api-scanner-tickets-'.now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($tickets) {
@@ -66,7 +67,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, ['id', 'judul', 'api_url', 'status', 'risiko', 'jumlah_temuan', 'monitoring', 'scan_terakhir', 'dibuat']);
 
-            $tickets->chunk(200, function ($chunk) use ($handle) {
+            $tickets->chunkById(200, function ($chunk) use ($handle) {
                 foreach ($chunk as $ticket) {
                     fputcsv($handle, [
                         $ticket->id,
@@ -102,10 +103,18 @@ class TicketController extends Controller
     {
         Gate::authorize('view', $ticket);
 
-        $history = $ticket->scans()->orderByDesc('id')->limit(10)->get();
+        $history = $ticket->scans()->orderByDesc('id')->limit(20)->get();
+        $historyTotal = $ticket->scans()->count();
 
-        // Compare the two most recent successful scans: what got fixed, what is new.
-        [$latest, $previous] = $history->where('status', 'completed')->values()->take(2)->pad(2, null)->all();
+        // Compare the two most recent successful scans: what got fixed, what is
+        // new. Queried directly so a run of failed scans cannot hide them.
+        [$latest, $previous] = $ticket->scans()
+            ->where('status', 'completed')
+            ->orderByDesc('id')
+            ->limit(2)
+            ->get()
+            ->pad(2, null)
+            ->all();
 
         $changes = null;
 
@@ -117,7 +126,7 @@ class TicketController extends Controller
             ];
         }
 
-        return view('tickets.show', compact('ticket', 'history', 'changes'));
+        return view('tickets.show', compact('ticket', 'history', 'historyTotal', 'changes'));
     }
 
     public function edit(Ticket $ticket)

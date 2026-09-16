@@ -1,3 +1,6 @@
+<link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+<link rel="alternate icon" href="{{ asset('favicon.ico') }}" sizes="any">
+
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=inter:400,500,600|jetbrains-mono:400,500" rel="stylesheet" />
 
@@ -14,7 +17,7 @@
         --surface-2: #f5f5f4;
         --ink: #1c1917;
         --ink-soft: #57534e;
-        --ink-faint: #a8a29e;
+        --ink-faint: #78716c;
         --line: #e7e5e4;
         --line-strong: #d6d3d1;
         --accent: #2563eb;
@@ -42,7 +45,7 @@
         --surface-2: #171412;
         --ink: #f5f5f4;
         --ink-soft: #a8a29e;
-        --ink-faint: #78716c;
+        --ink-faint: #9d968f;
         --line: #292524;
         --line-strong: #44403c;
         --accent: #60a5fa;
@@ -87,6 +90,22 @@
     .faint { color: var(--ink-faint); }
     .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    .skip-link {
+        position: absolute;
+        left: 0.75rem;
+        top: -3rem;
+        z-index: 100;
+        padding: 0.55rem 0.9rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--btn-ink);
+        background: var(--btn-bg);
+        border-radius: 0 0 8px 8px;
+        text-decoration: none;
+        transition: top 0.15s;
+    }
+    .skip-link:focus { top: 0; }
 
     /* Brand */
     .brand {

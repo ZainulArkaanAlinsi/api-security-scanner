@@ -5,10 +5,14 @@ namespace Tests\Feature;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\ScanFindingsNotification;
+use App\Services\ApiScanner;
 use App\Services\CertificateInspector;
+use App\Services\ScanRunner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use RuntimeException;
 use Tests\TestCase;
 
 class MonitoringTest extends TestCase
@@ -113,6 +117,54 @@ class MonitoringTest extends TestCase
         $this->artisan('scan:due')->assertSuccessful();
 
         Notification::assertNothingSent();
+    }
+
+    public function test_a_second_scan_is_rejected_while_one_is_running(): void
+    {
+        $user = User::factory()->create();
+        $ticket = $this->ticketFor($user);
+
+        // Hold the lock the runner uses, as a concurrent scan would.
+        $lock = Cache::lock("scan-ticket-{$ticket->id}", 60);
+        $this->assertTrue($lock->get());
+
+        Http::fake(['*' => Http::response('{}', 200)]);
+
+        $this->actingAs($user)->post(route('tickets.scan', $ticket))
+            ->assertRedirect(route('tickets.show', $ticket))
+            ->assertSessionHas('error');
+
+        $this->assertSame(0, $ticket->scans()->count());
+
+        $lock->release();
+    }
+
+    public function test_unexpected_failure_does_not_leave_the_ticket_scanning(): void
+    {
+        $user = User::factory()->create();
+        $ticket = $this->ticketFor($user);
+
+        // A broken collaborator stands in for a crash mid-scan.
+        $this->app->bind(ApiScanner::class, fn () => new class extends ApiScanner
+        {
+            public function __construct() {}
+
+            public function scan(string $url): array
+            {
+                throw new RuntimeException('boom');
+            }
+        });
+
+        try {
+            app(ScanRunner::class)->run($ticket);
+            $this->fail('Expected the runner to rethrow.');
+        } catch (RuntimeException $e) {
+            $this->assertSame('boom', $e->getMessage());
+        }
+
+        $ticket->refresh();
+        $this->assertSame('failed', $ticket->status);
+        $this->assertStringContainsString('kesalahan tak terduga', $ticket->scan_result['error']);
     }
 
     public function test_csv_export_respects_filters_and_ownership(): void

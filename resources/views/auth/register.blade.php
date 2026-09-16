@@ -18,21 +18,21 @@
     <div class="field {{ $errors->has('email') ? 'has-error' : '' }}">
         <label class="label" for="email">Email</label>
         <input class="input" type="email" id="email" name="email" value="{{ old('email') }}"
-            placeholder="nama@perusahaan.com" required autocomplete="username">
-        @error('email')<p class="error">{{ $message }}</p>@enderror
+            placeholder="nama@perusahaan.com" required autocomplete="username"
+            @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+        @error('email')<p class="error" id="email-error">{{ $message }}</p>@enderror
     </div>
 
     <div class="field {{ $errors->has('password') ? 'has-error' : '' }}">
         <label class="label" for="password">Password</label>
         <div class="input-box">
-            <input class="input" type="password" id="password" name="password" required autocomplete="new-password" aria-describedby="password-hint">
+            <input class="input" type="password" id="password" name="password" required autocomplete="new-password"
+                aria-describedby="password-hint @error('password') password-error @enderror"
+                @error('password') aria-invalid="true" @enderror>
             <button type="button" class="toggle-pass" data-toggle-pass="password" aria-pressed="false">Lihat</button>
         </div>
-        @error('password')
-            <p class="error">{{ $message }}</p>
-        @else
-            <p class="hint" id="password-hint">Minimal 8 karakter.</p>
-        @enderror
+        @error('password')<p class="error" id="password-error">{{ $message }}</p>@enderror
+        <p class="hint" id="password-hint">Minimal 8 karakter.</p>
     </div>
 
     <div class="field">

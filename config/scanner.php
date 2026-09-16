@@ -30,6 +30,20 @@ return [
     'ca_bundle' => env('SCANNER_CA_BUNDLE'),
 
     /*
+    | Ports the scanner may connect to. Keeping this to the standard web ports
+    | stops the scanner from being used as an anonymous port prober.
+    */
+
+    'allowed_ports' => [80, 443],
+
+    /*
+    | Hard cap on the response body we download, so a hostile target cannot
+    | stream the PHP worker out of memory.
+    */
+
+    'max_response_bytes' => 5 * 1024 * 1024,
+
+    /*
     | Responses slower than this (milliseconds) are reported as a finding.
     */
 

@@ -62,8 +62,8 @@
     .changes .fixed h3 { color: var(--ok); }
     .changes .new h3 { color: var(--danger); }
 
-    .trend { display: flex; align-items: flex-end; gap: 6px; height: 56px; padding: 1rem 1.25rem 0; }
-    .trend-col { flex: 1; min-width: 6px; max-width: 28px; height: 100%; display: flex; align-items: flex-end; }
+    .trend { display: flex; align-items: flex-end; gap: 6px; height: 56px; padding: 1rem 1.25rem 0; overflow-x: auto; }
+    .trend-col { flex: 1 0 8px; min-width: 8px; max-width: 28px; height: 100%; display: flex; align-items: flex-end; }
     .trend-col span { display: block; width: 100%; border-radius: 2px; }
 
     .history { list-style: none; font-size: 0.85rem; }
@@ -241,7 +241,11 @@
             <div class="card">
                 <div class="card-head">
                     <h2>Riwayat scan</h2>
-                    <span class="faint" style="font-size:0.8rem">{{ $history->count() }} terakhir</span>
+                    <span class="faint" style="font-size:0.8rem">
+                        {{ $historyTotal > $history->count()
+                            ? $history->count().' terakhir dari '.$historyTotal
+                            : $history->count().' scan' }}
+                    </span>
                 </div>
                 @php
                     $trend = $history->reverse()->values();

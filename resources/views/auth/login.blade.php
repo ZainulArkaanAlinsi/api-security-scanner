@@ -13,7 +13,7 @@
 @endif
 
 @if ($errors->any())
-    <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
+    <div class="alert alert-error" role="alert" id="login-error">{{ $errors->first() }}</div>
 @endif
 
 <form action="{{ route('login') }}" method="POST" novalidate>
@@ -22,7 +22,8 @@
     <div class="field {{ $errors->has('email') ? 'has-error' : '' }}">
         <label class="label" for="email">Email</label>
         <input class="input" type="email" id="email" name="email" value="{{ old('email') }}"
-            placeholder="nama@perusahaan.com" required autofocus autocomplete="username">
+            placeholder="nama@perusahaan.com" required autofocus autocomplete="username"
+            @if ($errors->any()) aria-invalid="true" aria-describedby="login-error" @endif>
     </div>
 
     <div class="field {{ $errors->has('password') ? 'has-error' : '' }}">
