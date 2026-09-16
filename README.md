@@ -12,6 +12,10 @@ Tempel URL endpoint, jalankan scan, dan dapatkan daftar masalah konfigurasi yang
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
 ![tests](https://img.shields.io/badge/tests-49%20passing-15803d)
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ZainulArkaanAlinsi/api-security-scanner)
+
+**Coba langsung di browser** — klik tombol di atas, tunggu dua menit, aplikasinya jalan lengkap dengan data contoh dan queue worker. Tanpa instalasi apa pun di komputermu.
+
 <img src="docs/screenshots/dashboard.jpg" alt="Dashboard API Scanner" width="820">
 
 </div>
@@ -212,6 +216,14 @@ Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumn
 </details>
 
 ---
+
+## Coba sendiri tanpa instalasi
+
+Repo ini punya konfigurasi dev container, jadi [GitHub Codespaces](https://codespaces.new/ZainulArkaanAlinsi/api-security-scanner) menyiapkan semuanya otomatis: dependensi, database SQLite berisi data contoh, server web, dan queue worker.
+
+Masuk dengan `demo@example.com` / `demo12345`, lalu coba scan endpoint publik mana pun milikmu.
+
+Cara yang sama juga berlaku di VS Code lokal dengan ekstensi *Dev Containers*.
 
 ## Deploy
 

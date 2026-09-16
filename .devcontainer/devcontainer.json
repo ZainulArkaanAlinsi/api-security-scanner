@@ -1,0 +1,29 @@
+{
+    "name": "API Scanner",
+    "image": "mcr.microsoft.com/devcontainers/php:8.3-bookworm",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        }
+    },
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "postAttachCommand": {
+        "server": "php artisan serve --host=0.0.0.0 --port=8000",
+        "worker": "php artisan queue:work --tries=1 --timeout=90"
+    },
+    "forwardPorts": [8000],
+    "portsAttributes": {
+        "8000": {
+            "label": "API Scanner",
+            "onAutoForward": "openPreview"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "onecentlin.laravel-blade"
+            ]
+        }
+    }
+}
