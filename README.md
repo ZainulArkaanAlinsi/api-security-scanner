@@ -36,16 +36,41 @@ Daftarkan endpoint sekali, lalu biarkan aplikasi ini yang mengecek. Setiap temua
 
 Setiap pemeriksaan menunjukkan lolos atau gagal, tingkat risikonya, dan langkah perbaikan yang konkret.
 
-<img src="docs/screenshots/scan-detail.jpg" alt="Detail hasil scan">
+<img src="docs/screenshots/scan-detail.jpg" alt="Detail hasil scan, mode gelap">
 
 </td>
 <td width="50%" valign="top">
 
-**Tampilan yang tidak bikin pusing**
+**Masuk tanpa basa-basi**
 
-Mode terang dan gelap, responsif sampai ukuran HP, dan bisa dipakai penuh lewat keyboard.
+Halaman login dengan contoh hasil scan di sisinya, supaya pengunjung langsung tahu ini aplikasi apa.
 
 <img src="docs/screenshots/login.jpg" alt="Halaman login">
+
+</td>
+</tr>
+</table>
+
+### Mode terang & gelap
+
+Tema mengikuti setelan sistem, dan bisa diganti kapan saja lewat satu tombol di navbar.
+
+<table>
+<tr>
+<td width="50%" valign="top" align="center">
+
+**Terang**
+
+<img src="docs/screenshots/dashboard-light.jpg" alt="Dashboard mode terang">
+<img src="docs/screenshots/scan-detail-light.jpg" alt="Detail scan mode terang">
+
+</td>
+<td width="50%" valign="top" align="center">
+
+**Gelap**
+
+<img src="docs/screenshots/dashboard.jpg" alt="Dashboard mode gelap">
+<img src="docs/screenshots/scan-detail.jpg" alt="Detail scan mode gelap">
 
 </td>
 </tr>
