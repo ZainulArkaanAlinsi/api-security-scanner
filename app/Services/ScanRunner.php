@@ -8,9 +8,7 @@ use App\Notifications\ScanFindingsNotification;
 
 class ScanRunner
 {
-    public function __construct(private ApiScanner $scanner)
-    {
-    }
+    public function __construct(private ApiScanner $scanner) {}
 
     /**
      * Run a scan, store it in the ticket history, and refresh the ticket summary.

@@ -38,7 +38,7 @@ return new class extends Migration
                 'severity',
                 'findings',
                 'scan_result',
-                'scanned_at'
+                'scanned_at',
             ]);
         });
     }

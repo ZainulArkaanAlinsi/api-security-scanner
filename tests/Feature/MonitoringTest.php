@@ -19,7 +19,8 @@ class MonitoringTest extends TestCase
     {
         parent::setUp();
 
-        $this->app->instance(CertificateInspector::class, new class extends CertificateInspector {
+        $this->app->instance(CertificateInspector::class, new class extends CertificateInspector
+        {
             public function daysUntilExpiry(string $host, string $ip, int $port): ?int
             {
                 return null;

@@ -15,9 +15,7 @@ class ApiScanner
 
     private array $checks = [];
 
-    public function __construct(private CertificateInspector $certificates)
-    {
-    }
+    public function __construct(private CertificateInspector $certificates) {}
 
     /**
      * Scan a URL and return ['severity' => ?string, 'findings' => array, 'result' => array].

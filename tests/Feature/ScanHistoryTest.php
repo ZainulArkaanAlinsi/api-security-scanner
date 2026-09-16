@@ -18,7 +18,8 @@ class ScanHistoryTest extends TestCase
     {
         parent::setUp();
 
-        $this->app->instance(CertificateInspector::class, new class extends CertificateInspector {
+        $this->app->instance(CertificateInspector::class, new class extends CertificateInspector
+        {
             public ?int $days = 90;
 
             public function daysUntilExpiry(string $host, string $ip, int $port): ?int

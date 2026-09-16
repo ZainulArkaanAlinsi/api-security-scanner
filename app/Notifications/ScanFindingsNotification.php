@@ -14,9 +14,7 @@ class ScanFindingsNotification extends Notification
     /**
      * @param  array<int, array{title: string, severity: string, detail: string}>  $findings
      */
-    public function __construct(public Ticket $ticket, public array $findings)
-    {
-    }
+    public function __construct(public Ticket $ticket, public array $findings) {}
 
     public function via(object $notifiable): array
     {
