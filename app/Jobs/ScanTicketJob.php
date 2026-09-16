@@ -13,8 +13,8 @@ class ScanTicketJob implements ShouldQueue
 {
     use Queueable;
 
-    /** Long enough for a slow endpoint plus the TLS probe. */
-    public int $timeout = 60;
+    /** Long enough for the main request, every active probe and the TLS check. */
+    public int $timeout = 180;
 
     public int $tries = 1;
 

@@ -44,6 +44,33 @@ return [
     'max_response_bytes' => 5 * 1024 * 1024,
 
     /*
+    |--------------------------------------------------------------------------
+    | Active probes
+    |--------------------------------------------------------------------------
+    |
+    | Beyond reading headers, the scanner sends extra requests: it looks for
+    | exposed files, asks which HTTP methods are allowed, fires a short burst to
+    | see whether rate limiting exists, and sends one malformed parameter to see
+    | how errors are handled. Turn this off for a headers-only scan.
+    |
+    */
+
+    'active_probes' => (bool) env('SCANNER_ACTIVE_PROBES', true),
+
+    /*
+    | Timeout (seconds) for each probe request — shorter than the main request
+    | so a slow target cannot stretch one scan past the queue job's limit.
+    */
+
+    'probe_timeout' => (int) env('SCANNER_PROBE_TIMEOUT', 5),
+
+    /*
+    | Requests sent back to back when testing for rate limiting.
+    */
+
+    'rate_limit_probe_requests' => (int) env('SCANNER_RATE_LIMIT_PROBE', 6),
+
+    /*
     | Responses slower than this (milliseconds) are reported as a finding.
     */
 

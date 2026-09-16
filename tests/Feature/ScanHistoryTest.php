@@ -27,6 +27,10 @@ class ScanHistoryTest extends TestCase
                 return $this->days;
             }
         });
+
+        // History and diffing only need the passive checks; one request per scan
+        // keeps the faked responses predictable.
+        config(['scanner.active_probes' => false]);
     }
 
     private function ticket(): array

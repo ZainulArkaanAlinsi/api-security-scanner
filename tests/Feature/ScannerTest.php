@@ -26,6 +26,9 @@ class ScannerTest extends TestCase
                 return null;
             }
         });
+
+        // This file covers the passive checks; probes have their own test file.
+        config(['scanner.active_probes' => false]);
     }
 
     private function scan(string $url): Ticket
@@ -116,7 +119,7 @@ class ScannerTest extends TestCase
         $this->assertSame('completed', $ticket->status);
         $this->assertNull($ticket->severity);
         $this->assertSame([], $ticket->findings);
-        $this->assertCount(11, $ticket->scan_result['checks']);
+        $this->assertCount(13, $ticket->scan_result['checks']);
     }
 
     public function test_wildcard_cors_with_credentials_is_high(): void
