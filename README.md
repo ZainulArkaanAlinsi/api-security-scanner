@@ -4,13 +4,14 @@
 
 ### Temukan celah di API kamu sebelum orang lain menemukannya.
 
-Tempel URL endpoint, jalankan scan, dan dapatkan daftar masalah konfigurasi yang diurutkan dari yang paling berisiko — lengkap dengan cara memperbaikinya.
+Tempel URL endpoint, jalankan scan, dan dapatkan **skor keamanan 0–100** beserta daftar masalah yang diurutkan dari yang paling berisiko — lengkap dengan cara memperbaikinya.
 
 [![tests](https://github.com/ZainulArkaanAlinsi/api-security-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/ZainulArkaanAlinsi/api-security-scanner/actions/workflows/tests.yml)
+[![docker](https://github.com/ZainulArkaanAlinsi/api-security-scanner/actions/workflows/docker.yml/badge.svg)](https://github.com/ZainulArkaanAlinsi/api-security-scanner/actions/workflows/docker.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
-![tests](https://img.shields.io/badge/tests-49%20passing-15803d)
+![tests](https://img.shields.io/badge/tests-95%20passing-15803d)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ZainulArkaanAlinsi/api-security-scanner)
 
@@ -24,23 +25,23 @@ Tempel URL endpoint, jalankan scan, dan dapatkan daftar masalah konfigurasi yang
 
 ## Masalahnya
 
-Kebanyakan kebocoran API bukan karena serangan canggih. Penyebabnya hal-hal kecil yang terlewat saat deploy: header keamanan yang lupa dipasang, CORS yang dibuka untuk semua origin saat debugging lalu lupa ditutup, mode debug yang masih menyala di production, atau sertifikat yang habis diam-diam di hari Sabtu.
+Kebanyakan kebocoran API bukan karena serangan canggih. Penyebabnya hal-hal kecil yang terlewat saat deploy: file `.env` yang ikut ter-upload, mode debug yang masih menyala, CORS yang dibuka untuk semua origin saat debugging lalu lupa ditutup, atau sertifikat yang habis diam-diam di hari Sabtu.
 
 Semua itu bisa dicek dalam hitungan detik — asal ada yang rutin mengeceknya.
 
 ## Solusinya
 
-Daftarkan endpoint sekali, lalu biarkan aplikasi ini yang mengecek. Setiap temuan datang dengan penjelasan **kenapa itu berbahaya** dan **apa yang harus diubah**, bukan sekadar label merah.
+Daftarkan endpoint sekali, lalu biarkan aplikasi ini yang mengecek. Bukan cuma membaca header: scanner **benar-benar menguji** endpoint-nya, lalu memberi skor yang bisa kamu pantau naik-turunnya dari waktu ke waktu.
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-**Hasil scan yang bisa ditindaklanjuti**
+**Skor yang langsung dimengerti**
 
-Setiap pemeriksaan menunjukkan lolos atau gagal, tingkat risikonya, dan langkah perbaikan yang konkret.
+Lingkaran skor dan grade A–F, plus rincian temuan per tingkat risiko dan saran perbaikan yang konkret.
 
-<img src="docs/screenshots/scan-detail.jpg" alt="Detail hasil scan, mode gelap">
+<img src="docs/screenshots/scan-detail.jpg" alt="Detail hasil scan">
 
 </td>
 <td width="50%" valign="top">
@@ -84,34 +85,27 @@ Tema mengikuti setelan sistem, dan bisa diganti kapan saja lewat satu tombol di 
 
 ## Apa yang dicek
 
-Sampai **12 pemeriksaan** di setiap scan:
+**18+ pemeriksaan** dalam satu scan, terbagi tujuh kategori. Yang bertanda 🔎 dilakukan dengan **mengirim request tambahan**, bukan sekadar membaca respons pertama.
 
-| Pemeriksaan | Risiko | Kenapa penting |
-|---|:---:|---|
-| Koneksi HTTPS | 🔴 high | Tanpa TLS, data bisa disadap dan diubah di tengah jalan |
-| Stack trace & pesan debug | 🔴 high | Respons error membocorkan struktur internal aplikasi |
-| CORS wildcard + credentials | 🔴 high | Situs mana pun bisa memakai sesi pengguna kamu |
-| Masa berlaku sertifikat TLS | 🟠 medium | Peringatan sebelum sertifikat habis dan API mati total |
-| Header HSTS | 🟠 medium | Mencegah browser diturunkan kembali ke http |
-| Flag cookie HttpOnly & Secure | 🟠 medium | Cookie tanpa flag bisa dibaca JavaScript |
-| Error server 5xx | 🟠 medium | Endpoint yang crash sering menandakan input tak tervalidasi |
-| X-Content-Type-Options | ⚪ low | Mencegah browser menebak tipe konten |
-| Proteksi clickjacking | ⚪ low | Halaman tidak bisa disematkan di iframe orang lain |
-| Content-Security-Policy | ⚪ low | Membatasi sumber script dan konten |
-| Kebocoran versi software | ⚪ low | Versi di header memudahkan pencarian exploit |
-| Waktu respons | ⚪ low | Endpoint lambat lebih mudah dijatuhkan |
+| Kategori | Pemeriksaan | Risiko tertinggi |
+|---|---|:---:|
+| **Berkas terekspos** 🔎 | `.env`, `.git/config`, `phpinfo.php`, `/actuator/env`, `/server-status`, `.DS_Store` — dicocokkan dengan tanda isi file, bukan sekadar status 200 | 🔴 critical |
+| **Data sensitif** | JWT, AWS key, private key, password di JSON, email, nomor kartu, NIK — dilaporkan **jenisnya saja**, nilainya tidak pernah ikut | 🔴 critical |
+| **Penanganan error** 🔎 | Kirim parameter janggal lalu cari pesan error database (indikasi SQL injection), stack trace, dan status 5xx | 🔴 high |
+| **Transport** | HTTPS, masa berlaku sertifikat TLS, HSTS | 🔴 high |
+| **Autentikasi** | Endpoint yang membalas data JSON tanpa token sama sekali | 🟠 medium |
+| **Konfigurasi** 🔎 | Rate limit (burst 6 request), method berisiko seperti TRACE/PUT/DELETE | 🟠 medium |
+| **Header & cookie** | CORS wildcard, `HttpOnly`/`Secure`, `nosniff`, clickjacking, CSP, kebocoran versi software | 🔴 high |
 
-## Cara kerjanya
+### Skor & grade
 
-```
-  1. Tambahkan endpoint        2. Scan masuk antrean         3. Perbaiki & scan ulang
-  ─────────────────────        ──────────────────────        ───────────────────────
-  Tempel URL API publik        Worker mengerjakan di          Ikuti saran tiap temuan,
-  yang ingin diperiksa    ──▶  latar belakang, halaman   ──▶  lalu bandingkan dengan
-                               memperbarui sendiri            scan sebelumnya
-```
+Setiap temuan mengurangi skor: **critical −45, high −22, medium −9, low −3**. Bobotnya sengaja curam, supaya satu file `.env` yang terekspos langsung menjatuhkan nilai.
 
-Setiap scan disimpan, jadi halaman ticket bisa menunjukkan **apa yang sudah kamu perbaiki** dan **apa yang baru muncul** sejak scan terakhir — beserta grafik trennya.
+| Skor | 90+ | 80–89 | 70–79 | 60–69 | 45–59 | &lt;45 |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Grade** | A | B | C | D | E | F |
+
+Skor disimpan di setiap scan, jadi grafik tren di halaman ticket memperlihatkan apakah keamanan API-mu membaik atau memburuk.
 
 ---
 
@@ -119,22 +113,25 @@ Setiap scan disimpan, jadi halaman ticket bisa menunjukkan **apa yang sudah kamu
 
 | | |
 |---|---|
-| 🔎 **Scanner** | 12 pemeriksaan keamanan, hasil diurutkan dari risiko tertinggi |
+| 🔎 **Scanner aktif** | 18+ pemeriksaan, hasil diurutkan dari risiko tertinggi, tiap temuan disertai cara memperbaikinya |
+| 💯 **Skor & grade** | Nilai 0–100 dengan grade A–F, rata-rata seluruh endpoint di dashboard |
+| 📥 **Import OpenAPI** | Tempel satu URL spec, semua endpoint GET jadi ticket dan bisa langsung di-scan |
 | ⚡ **Antrean** | Scan dikerjakan worker di latar belakang, request web tidak pernah menunggu |
-| 📈 **Riwayat & perbandingan** | Grafik tren, daftar temuan yang diperbaiki dan yang baru, riwayat ber-pagination |
+| 📈 **Riwayat & perbandingan** | Grafik tren skor, daftar temuan yang sudah diperbaiki dan yang baru muncul |
 | 🔔 **Monitoring otomatis** | Scan ulang tiap 6 jam, email peringatan hanya untuk temuan high/critical yang benar-benar baru |
+| 🔗 **Link laporan publik** | Bagikan hasil scan lewat URL rahasia, tanpa perlu akun. Bisa dimatikan kapan saja |
+| 🤖 **API untuk CI/CD** | Token Bearer, scan dipanggil dari GitHub Actions atau pipeline mana pun |
 | 📄 **Laporan** | Versi cetak / simpan PDF, unduhan JSON, dan export CSV daftar ticket |
-| 🔐 **Akun** | Register, login berbatas percobaan, reset password, profil, hapus akun |
-| 🛡️ **Aman by default** | Anti-SSRF, isolasi data antar pengguna, rate limit, dan header keamanan di aplikasinya sendiri |
-| 🌗 **UI** | Mode terang/gelap, responsif, aksesibel (WCAG AA), halaman error kustom |
+| 🛡️ **Aman by default** | Anti-SSRF, isolasi data antar pengguna, rate limit, header keamanan di aplikasinya sendiri |
 
 ### Aman sejak di dalam
 
 Aplikasi yang menilai keamanan orang lain harus tahan uji sendiri:
 
-- **Anti-SSRF berlapis** — localhost, IP privat, dan alamat metadata cloud ditolak; koneksi dikunci ke IP yang sudah divalidasi supaya DNS tidak bisa ditukar di tengah jalan; redirect tidak diikuti
+- **Anti-SSRF berlapis** — localhost, IP privat, dan alamat metadata cloud ditolak; koneksi dikunci ke IP yang sudah divalidasi supaya DNS tidak bisa ditukar di tengah jalan; redirect tidak diikuti. Aturan yang sama berlaku untuk URL dokumen OpenAPI
 - **Tidak bisa disalahgunakan** — scan dibatasi ke port 80/443 dan respons dipotong di 5 MB
 - **Data terisolasi** — ticket milik pengguna lain dijawab 404, bukan 403, supaya ID tidak bisa ditebak
+- **Token aman** — API token disimpan sebagai hash SHA-256 dan hanya ditampilkan sekali
 - **Tahan gagal** — scan yang mati di tengah jalan tidak meninggalkan ticket menggantung, dan satu ticket tidak bisa di-scan dua kali bersamaan
 - **Header sendiri lulus** — `X-Frame-Options`, CSP, `nosniff`, `Referrer-Policy`, dan HSTS dipasang otomatis
 
@@ -168,7 +165,17 @@ Buka http://127.0.0.1:8000, lalu masuk dengan akun demo:
 |---|---|
 | `demo@example.com` | `demo12345` |
 
-> Akun demo berisi 4 ticket contoh: API yang membaik dari waktu ke waktu, endpoint legacy bermasalah, sertifikat yang hampir kedaluwarsa, dan ticket yang belum pernah di-scan. Jangan jalankan seeder ini di production.
+> Setiap kali kode berubah, **restart queue worker** — worker memuat kode sekali saat dijalankan.
+
+### Import dari OpenAPI
+
+Menu **Import OpenAPI** menerima URL dokumen OpenAPI 3 atau Swagger 2, format JSON maupun YAML:
+
+```
+https://petstore3.swagger.io/api/v3/openapi.json
+```
+
+Semua operasi `GET` jadi ticket (maksimal 50 sekali impor), parameter seperti `/pet/{petId}` diisi `1`, endpoint yang sudah ada dilewati, dan bisa langsung di-scan semuanya.
 
 ### Monitoring otomatis
 
@@ -179,13 +186,51 @@ php artisan schedule:work                # lokal
 # di server: * * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-`scan:due --hours=2` berjalan tiap 6 jam. Bisa juga manual:
+`scan:due --hours=2` berjalan tiap 6 jam. Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumnya**, jadi tidak ada spam untuk masalah yang sama.
+
+---
+
+## API untuk CI/CD
+
+Buat token di halaman **Profil → API token** (ditampilkan sekali, disimpan sebagai hash), lalu:
 
 ```bash
-php artisan scan:due --hours=6 --limit=5
+# Antrekan scan
+curl -X POST https://host-kamu/api/v1/scans \
+  -H "Authorization: Bearer $API_SCANNER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://api.domainkamu.com/v1/health"}'
+
+# Ambil hasilnya
+curl https://host-kamu/api/v1/scans/12 \
+  -H "Authorization: Bearer $API_SCANNER_TOKEN"
 ```
 
-Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumnya**, jadi tidak ada spam untuk masalah yang sama.
+| Endpoint | Keterangan |
+|---|---|
+| `POST /api/v1/scans` | Antrekan scan (202). URL yang sudah terdaftar dipakai ulang, bukan diduplikasi |
+| `GET /api/v1/scans/{id}` | Skor, grade, temuan, dan detail hasil |
+| `GET /api/v1/tickets` | Daftar endpoint beserta skor terakhir |
+
+Contoh di GitHub Actions — gagalkan build kalau skornya jeblok:
+
+```yaml
+- name: Scan API
+  run: |
+    ID=$(curl -sX POST $SCANNER/api/v1/scans \
+      -H "Authorization: Bearer ${{ secrets.API_SCANNER_TOKEN }}" \
+      -H "Content-Type: application/json" \
+      -d '{"url":"https://api.domainkamu.com/v1/health"}' | jq .data.id)
+    sleep 20
+    SCORE=$(curl -s $SCANNER/api/v1/scans/$ID \
+      -H "Authorization: Bearer ${{ secrets.API_SCANNER_TOKEN }}" | jq .data.score)
+    echo "Skor keamanan: $SCORE"
+    [ "$SCORE" -ge 80 ] || { echo "Skor di bawah 80"; exit 1; }
+```
+
+## Berbagi laporan
+
+Tombol **Buat link publik** di halaman ticket menghasilkan URL rahasia (`/r/{token}`) yang bisa dibuka tanpa login — enak untuk dikirim ke klien atau tim. Mematikan lalu menyalakannya lagi menerbitkan link baru, sehingga link lama langsung mati.
 
 ---
 
@@ -194,8 +239,11 @@ Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumn
 | Variabel `.env` | Default | Keterangan |
 |---|---|---|
 | `SCANNER_CA_BUNDLE` | kosong | Path file CA untuk verifikasi HTTPS. **Wajib di Laragon/Windows** jika `curl.cainfo` kosong, misalnya `C:/laragon/etc/ssl/cacert.pem` |
+| `SCANNER_ACTIVE_PROBES` | `true` | Matikan untuk scan header saja, tanpa request tambahan |
 | `SCANNER_ALLOW_PRIVATE` | `false` | Izinkan scan ke IP privat. Aktifkan hanya di mesin lokal |
 | `SCANNER_TIMEOUT` | `10` | Batas waktu respons target (detik) |
+| `SCANNER_PROBE_TIMEOUT` | `5` | Batas waktu tiap probe |
+| `SCANNER_IMPORT_LIMIT` | `50` | Maksimal endpoint per impor OpenAPI |
 | `QUEUE_CONNECTION` | `database` | Scan dijalankan lewat antrean |
 | `MAIL_MAILER` | `log` | Dengan `log`, email ditulis ke `storage/logs/laravel.log` |
 
@@ -206,24 +254,14 @@ Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumn
 
 - [ ] `APP_ENV=production` dan `APP_DEBUG=false` — mode debug membocorkan stack trace dan isi env
 - [ ] `APP_KEY` dibuat ulang dengan `php artisan key:generate`
-- [ ] `APP_URL` diisi domain sebenarnya (dipakai link email)
+- [ ] `APP_URL` diisi domain sebenarnya (dipakai link email dan link laporan publik)
 - [ ] `SESSION_SECURE_COOKIE=true` saat memakai HTTPS
 - [ ] `SCANNER_ALLOW_PRIVATE=false`
 - [ ] Konfigurasi SMTP diisi, jangan biarkan `MAIL_MAILER=log`
-- [ ] Queue worker dijalankan sebagai service (Supervisor/systemd)
+- [ ] Queue worker dijalankan sebagai service (Supervisor/systemd) dan ikut di-restart setiap deploy
 - [ ] `DemoSeeder` tidak dijalankan
 
 </details>
-
----
-
-## Coba sendiri tanpa instalasi
-
-Repo ini punya konfigurasi dev container, jadi [GitHub Codespaces](https://codespaces.new/ZainulArkaanAlinsi/api-security-scanner) menyiapkan semuanya otomatis: dependensi, database SQLite berisi data contoh, server web, dan queue worker.
-
-Masuk dengan `demo@example.com` / `demo12345`, lalu coba scan endpoint publik mana pun milikmu.
-
-Cara yang sama juga berlaku di VS Code lokal dengan ekstensi *Dev Containers*.
 
 ## Deploy
 
@@ -231,7 +269,6 @@ Sudah tersedia `Dockerfile`, `fly.toml`, dan `docker-compose.yml`. Satu image di
 
 ```bash
 docker compose up --build     # jalankan versi production di komputer sendiri
-fly deploy                    # atau ke Fly.io
 ```
 
 Panduan lengkap:
@@ -241,43 +278,47 @@ Panduan lengkap:
 
 > Platform yang hanya menjalankan satu proses web (Vercel, Netlify, shared hosting) tidak cocok, karena scan dikerjakan oleh worker terpisah.
 
+---
+
 ## Teknologi
 
-**Laravel 12** · **PHP 8.2+** · MySQL/MariaDB atau SQLite · antrean berbasis database · Blade dengan design system sendiri (tanpa framework CSS) · PHPUnit · GitHub Actions
+**Laravel 12** · **PHP 8.2+** · MySQL/MariaDB atau SQLite · antrean berbasis database · Blade dengan design system sendiri (tanpa framework CSS) · PHPUnit · GitHub Actions · Docker + FrankenPHP
 
 ### Peta kode
 
 | Lokasi | Isi |
 |---|---|
-| `app/Services/ApiScanner.php` | Semua logika pemeriksaan dan pertahanan SSRF |
+| `app/Services/ApiScanner.php` | Semua pemeriksaan pasif dan probe aktif |
+| `app/Services/TargetResolver.php` | Penjaga SSRF yang dipakai bersama scanner dan importer |
+| `app/Services/SecurityScore.php` | Perhitungan skor dan grade |
+| `app/Services/OpenApiImporter.php` | Membaca OpenAPI 3 / Swagger 2, JSON maupun YAML |
 | `app/Services/ScanRunner.php` | Menjalankan scan, menyimpan riwayat, memicu notifikasi |
 | `app/Jobs/ScanTicketJob.php` | Scan versi antrean, lengkap dengan penanganan worker mati |
-| `app/Services/CertificateInspector.php` | Membaca masa berlaku sertifikat TLS |
+| `app/Http/Controllers/Api/ScanApiController.php` | API untuk CI/CD |
 | `app/Policies/TicketPolicy.php` | Aturan kepemilikan ticket |
-| `app/Http/Middleware/SecurityHeaders.php` | Header keamanan aplikasi sendiri |
 | `resources/views/partials/theme.blade.php` | Design token dan komponen UI bersama |
 
 ## Testing
 
 ```bash
-php artisan test        # 49 test
+php artisan test        # 95 test
 ./vendor/bin/pint       # code style
 ```
 
-Test memakai SQLite in-memory, jadi database utama tidak tersentuh. Request HTTP dan pemeriksaan sertifikat di-mock, sehingga test jalan tanpa koneksi internet. Setiap push diperiksa GitHub Actions.
+Test memakai SQLite in-memory, jadi database utama tidak tersentuh. Request HTTP dan pemeriksaan sertifikat di-mock, sehingga test jalan tanpa koneksi internet. Setiap push diperiksa GitHub Actions, termasuk build image Docker.
 
 ## Rencana berikutnya
 
 - [ ] Verifikasi email saat registrasi
-- [ ] API token supaya scan bisa dipanggil dari pipeline CI
 - [ ] Webhook ke Slack/Discord selain email
-- [ ] Perbandingan antar dua scan pilihan
+- [ ] Perbandingan berdampingan antar dua scan pilihan
+- [ ] Pemeriksaan autentikasi yang lebih dalam (uji token kedaluwarsa dan akses lintas akun)
 
 ---
 
 ## Catatan penggunaan
 
-Scanner hanya mengirim satu request `GET` ke URL yang kamu daftarkan — tidak ada eksploitasi, tidak ada brute force. Meski begitu, **scan hanya endpoint yang kamu miliki atau yang kamu punya izin untuk menguji.**
+Scanner mengirim beberapa request `GET` ke URL yang kamu daftarkan dan ke beberapa path umum seperti `/.env` — tidak ada eksploitasi, tidak ada perubahan data, tidak ada brute force. Meski begitu, **scan hanya endpoint yang kamu miliki atau yang kamu punya izin untuk menguji.**
 
 ## Lisensi
 
