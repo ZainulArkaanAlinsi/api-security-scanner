@@ -92,6 +92,7 @@ docker compose -f $C exec app php artisan migrate --force
 | Halaman error menampilkan stack trace | `APP_DEBUG` masih `true` di `.env` |
 | Scan selalu gagal "tidak bisa terhubung" | Semua koneksi keluar VM diblokir; cek egress rule di Security List |
 | Sertifikat HTTPS gagal terbit | Domain belum mengarah ke IP VM, atau port 80 tertutup |
+| Tautan di email atau Slack tidak bisa diklik | `APP_URL` di `.env` masih `http://localhost`, bukan domain atau IP sebenarnya |
 
 ## Backup database
 

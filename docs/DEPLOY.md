@@ -127,6 +127,8 @@ Buka http://localhost:8080. Compose menjalankan web, worker, scheduler, dan MySQ
 
 ## Catatan
 
+- **`APP_URL` wajib benar.** Nilai ini dipakai untuk menyusun tautan di email reset password, pesan Slack/Discord, link laporan publik, dan URL badge. Kalau masih `http://localhost`, semua tautan itu tidak bisa diklik penerimanya.
 - **Email**: `MAIL_MAILER=log` tidak mengirim apa pun. Pakai SMTP seperti Mailtrap, Resend, atau Brevo.
+- **Slack/Discord**: webhook diatur per pengguna dari halaman Profil, bukan lewat `.env`.
 - **Sertifikat CA**: image Linux sudah membawa CA bundle, jadi `SCANNER_CA_BUNDLE` biarkan kosong. Variabel itu hanya diperlukan di Windows/Laragon.
 - **Jangan** menjalankan `DemoSeeder` di production, karena password akun demonya tertulis publik di README.

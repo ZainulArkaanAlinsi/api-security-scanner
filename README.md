@@ -11,7 +11,7 @@ Tempel URL endpoint, jalankan scan, dan dapatkan **skor keamanan 0–100** beser
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php&logoColor=white)
-![tests](https://img.shields.io/badge/tests-95%20passing-15803d)
+![tests](https://img.shields.io/badge/tests-129%20passing-15803d)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ZainulArkaanAlinsi/api-security-scanner)
 
@@ -335,7 +335,7 @@ Panduan lengkap:
 ## Testing
 
 ```bash
-php artisan test        # 95 test
+php artisan test        # 129 test
 ./vendor/bin/pint       # code style
 ```
 
