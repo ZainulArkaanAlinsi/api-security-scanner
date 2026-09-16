@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ScanTicketJob;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\ScanFindingsNotification;
@@ -9,9 +10,9 @@ use App\Services\ApiScanner;
 use App\Services\CertificateInspector;
 use App\Services\ScanRunner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -119,24 +120,45 @@ class MonitoringTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_a_second_scan_is_rejected_while_one_is_running(): void
+    public function test_scanning_is_queued_instead_of_blocking_the_request(): void
     {
+        Queue::fake();
+
         $user = User::factory()->create();
         $ticket = $this->ticketFor($user);
 
-        // Hold the lock the runner uses, as a concurrent scan would.
-        $lock = Cache::lock("scan-ticket-{$ticket->id}", 60);
-        $this->assertTrue($lock->get());
+        $this->actingAs($user)->post(route('tickets.scan', $ticket))
+            ->assertRedirect(route('tickets.show', $ticket))
+            ->assertSessionHas('success');
 
-        Http::fake(['*' => Http::response('{}', 200)]);
+        Queue::assertPushed(ScanTicketJob::class, fn ($job) => $job->ticket->is($ticket) && $job->notify === false);
+        $this->assertSame('scanning', $ticket->fresh()->status);
+    }
+
+    public function test_a_second_scan_is_rejected_while_one_is_running(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $ticket = $this->ticketFor($user, ['status' => 'scanning']);
 
         $this->actingAs($user)->post(route('tickets.scan', $ticket))
             ->assertRedirect(route('tickets.show', $ticket))
             ->assertSessionHas('error');
 
-        $this->assertSame(0, $ticket->scans()->count());
+        Queue::assertNothingPushed();
+    }
 
-        $lock->release();
+    public function test_a_killed_worker_does_not_leave_the_ticket_scanning(): void
+    {
+        $user = User::factory()->create();
+        $ticket = $this->ticketFor($user, ['status' => 'scanning']);
+
+        (new ScanTicketJob($ticket))->failed(new RuntimeException('worker killed'));
+
+        $ticket->refresh();
+        $this->assertSame('failed', $ticket->status);
+        $this->assertStringContainsString('tidak selesai', $ticket->scan_result['error']);
     }
 
     public function test_unexpected_failure_does_not_leave_the_ticket_scanning(): void

@@ -2,33 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ScanTicketJob;
 use App\Models\Ticket;
-use App\Services\ScanBusyException;
-use App\Services\ScanRunner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class TicketScanController extends Controller
 {
-    public function scan(Ticket $ticket, ScanRunner $runner)
+    public function scan(Ticket $ticket)
     {
         Gate::authorize('update', $ticket);
 
-        try {
-            $scan = $runner->run($ticket);
-        } catch (ScanBusyException $e) {
-            return redirect()->route('tickets.show', $ticket)->with('error', $e->getMessage());
+        if ($ticket->status === 'scanning') {
+            return redirect()->route('tickets.show', $ticket)
+                ->with('error', 'Ticket ini sedang di-scan. Tunggu sampai scan yang berjalan selesai.');
         }
 
-        if ($scan->status === 'failed') {
-            return redirect()->route('tickets.show', $ticket)->with('error', $scan->error);
-        }
+        // Queued, so a slow endpoint never holds the browser hostage.
+        $ticket->update(['status' => 'scanning']);
 
-        $count = count($scan->findings ?? []);
+        ScanTicketJob::dispatch($ticket);
 
-        return redirect()->route('tickets.show', $ticket)->with('success', $count === 0
-            ? 'Scan selesai. Tidak ada temuan.'
-            : "Scan selesai dengan {$count} temuan.");
+        return redirect()->route('tickets.show', $ticket)
+            ->with('success', 'Scan dimulai. Halaman ini akan memperbarui dirinya sendiri saat hasilnya siap.');
     }
 
     public function monitoring(Request $request, Ticket $ticket)

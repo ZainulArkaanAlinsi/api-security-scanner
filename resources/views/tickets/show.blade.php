@@ -66,6 +66,18 @@
     .trend-col { flex: 1 0 8px; min-width: 8px; max-width: 28px; height: 100%; display: flex; align-items: flex-end; }
     .trend-col span { display: block; width: 100%; border-radius: 2px; }
 
+    .spinner {
+        width: 18px;
+        height: 18px;
+        flex: none;
+        border: 2px solid var(--line-strong);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
     .history { list-style: none; font-size: 0.85rem; }
     .history li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; padding: 0.6rem 1.25rem; border-bottom: 1px solid var(--line); }
     .history li:last-child { border-bottom: 0; }
@@ -88,6 +100,15 @@
     }
 </style>
 @endpush
+
+@if ($ticket->status === 'scanning')
+    @push('scripts')
+        <script>
+            // Poll while the queued scan runs; stops as soon as the status changes.
+            setTimeout(() => window.location.reload(), 5000);
+        </script>
+    @endpush
+@endif
 
 @section('content')
 @php
@@ -114,16 +135,33 @@
     </div>
     <div class="row">
         <a href="{{ route('tickets.edit', $ticket) }}" class="btn btn-secondary">Edit</a>
-        <form action="{{ route('tickets.scan', $ticket) }}" method="POST" data-busy="Sedang scan…">
-            @csrf
-            <button type="submit" class="btn btn-primary">{{ $ticket->scanned_at ? 'Scan ulang' : 'Jalankan scan' }}</button>
-        </form>
+        @if ($ticket->status === 'scanning')
+            <span class="btn btn-primary" aria-disabled="true">Sedang scan…</span>
+        @else
+            <form action="{{ route('tickets.scan', $ticket) }}" method="POST" data-busy="Mengantre…">
+                @csrf
+                <button type="submit" class="btn btn-primary">{{ $ticket->scanned_at ? 'Scan ulang' : 'Jalankan scan' }}</button>
+            </form>
+        @endif
     </div>
 </div>
 
 <div class="detail-grid">
     <div class="stack">
-        @if ($ticket->status === 'failed')
+        @if ($ticket->status === 'scanning')
+            <div class="card card-pad" role="status" aria-live="polite">
+                <div class="row" style="gap:0.75rem">
+                    <span class="spinner" aria-hidden="true"></span>
+                    <div>
+                        <h2>Scan sedang berjalan</h2>
+                        <p class="muted" style="margin-top:0.25rem;font-size:0.875rem">
+                            Scan berjalan di latar belakang, jadi kamu bebas menutup atau meninggalkan halaman ini.
+                            Halaman diperbarui otomatis saat hasilnya siap.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @elseif ($ticket->status === 'failed')
             <div class="card card-pad">
                 <h2>Scan gagal</h2>
                 <p class="muted" style="margin-top:0.35rem">{{ $result['error'] ?? 'Terjadi kesalahan saat menghubungi endpoint.' }}</p>

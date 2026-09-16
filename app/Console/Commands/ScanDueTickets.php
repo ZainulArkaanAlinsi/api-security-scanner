@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ScanTicketJob;
 use App\Models\Ticket;
-use App\Services\ScanBusyException;
-use App\Services\ScanRunner;
 use Illuminate\Console\Command;
 
 class ScanDueTickets extends Command
@@ -13,7 +12,7 @@ class ScanDueTickets extends Command
 
     protected $description = 'Re-scan tickets that have monitoring enabled and were not scanned recently';
 
-    public function handle(ScanRunner $runner): int
+    public function handle(): int
     {
         $cutoff = now()->subHours((int) $this->option('hours'));
 
@@ -31,21 +30,14 @@ class ScanDueTickets extends Command
         }
 
         foreach ($tickets as $ticket) {
-            try {
-                $scan = $runner->run($ticket, notify: true);
-            } catch (ScanBusyException $e) {
-                $this->line("  [lewat]   #{$ticket->id} {$ticket->title} — sedang di-scan proses lain");
+            $ticket->update(['status' => 'scanning']);
 
-                continue;
-            }
+            ScanTicketJob::dispatch($ticket, notify: true);
 
-            $this->line(match ($scan->status) {
-                'failed' => "  [gagal]   #{$ticket->id} {$ticket->title} — {$scan->error}",
-                default => sprintf('  [%s] #%d %s — %d temuan', str_pad($scan->severity ?? 'bersih', 7), $ticket->id, $ticket->title, count($scan->findings ?? [])),
-            });
+            $this->line("  [antri]   #{$ticket->id} {$ticket->title}");
         }
 
-        $this->info("Selesai: {$tickets->count()} ticket di-scan.");
+        $this->info("{$tickets->count()} ticket masuk antrean. Pastikan queue worker berjalan (php artisan queue:work).");
 
         return self::SUCCESS;
     }

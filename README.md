@@ -15,6 +15,7 @@ Aplikasi web Laravel untuk mengaudit konfigurasi keamanan endpoint API. Tambahka
 
 ## Fitur
 
+- **Scan lewat antrean**: request langsung kembali, scan dikerjakan worker di latar belakang, dan halaman ticket memperbarui dirinya sendiri saat hasilnya siap
 - **Scanner keamanan**: hingga 12 pemeriksaan per scan
   - HTTPS, masa berlaku sertifikat TLS, HSTS
   - CORS (wildcard, wildcard + credentials)
@@ -58,6 +59,14 @@ php artisan migrate
 php artisan db:seed --class=DemoSeeder   # opsional: data contoh
 php artisan serve
 ```
+
+Scan berjalan lewat antrean, jadi jalankan worker di terminal terpisah:
+
+```bash
+php artisan queue:work
+```
+
+Tanpa worker, ticket akan berhenti di status "Sedang scan" dan tidak pernah selesai.
 
 Buka http://127.0.0.1:8000.
 
@@ -116,6 +125,7 @@ Aplikasi ini mengaudit keamanan orang lain, jadi konfigurasinya sendiri harus be
 - [ ] `SCANNER_ALLOW_PRIVATE=false` (nilai default; jangan diaktifkan di server publik)
 - [ ] Konfigurasi SMTP diisi, jangan biarkan `MAIL_MAILER=log`
 - [ ] Jangan jalankan `DemoSeeder` di production
+- [ ] Queue worker dijalankan sebagai service (Supervisor/systemd), bukan manual di terminal
 
 Header keamanan (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, CSP, dan HSTS saat HTTPS) sudah dipasang otomatis oleh `app/Http/Middleware/SecurityHeaders.php`.
 
@@ -143,5 +153,5 @@ Test memakai SQLite in-memory (diatur di `phpunit.xml`), jadi database MySQL tid
 
 ## Catatan
 
-- Scan berjalan langsung saat tombol diklik (tanpa queue); untuk endpoint lambat halaman bisa menunggu hingga ~15 detik.
+- Scan dikerjakan queue worker, jadi endpoint lambat tidak menahan request web. Job diberi batas 60 detik; kalau worker mati di tengah jalan, ticket ditandai gagal, bukan menggantung.
 - Scanner hanya mengirim satu request `GET` ke URL yang didaftarkan. Scan hanya endpoint yang kamu miliki atau punya izin untuk diuji.
