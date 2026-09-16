@@ -1,5 +1,8 @@
 # API Scanner
 
+[![tests](https://github.com/ZainulArkaanAlinsi/api-security-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/ZainulArkaanAlinsi/api-security-scanner/actions/workflows/tests.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Aplikasi web Laravel untuk mengaudit konfigurasi keamanan endpoint API. Tambahkan URL, jalankan scan, dan dapatkan daftar temuan yang diurutkan berdasarkan tingkat risiko beserta cara memperbaikinya.
 
 ## Tampilan
