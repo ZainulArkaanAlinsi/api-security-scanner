@@ -120,6 +120,8 @@ Skor disimpan di setiap scan, jadi grafik tren di halaman ticket memperlihatkan 
 | 📈 **Riwayat & perbandingan** | Grafik tren skor, daftar temuan yang sudah diperbaiki dan yang baru muncul |
 | 🔔 **Monitoring otomatis** | Scan ulang tiap 6 jam, email peringatan hanya untuk temuan high/critical yang benar-benar baru |
 | 🔗 **Link laporan publik** | Bagikan hasil scan lewat URL rahasia, tanpa perlu akun. Bisa dimatikan kapan saja |
+| 🏷️ **Badge skor** | SVG bergaya shields.io berisi grade API-mu, siap ditempel di README proyek |
+| 🚀 **Scan massal** | Satu tombol untuk mengantrekan scan seluruh endpoint sekaligus |
 | 🤖 **API untuk CI/CD** | Token Bearer, scan dipanggil dari GitHub Actions atau pipeline mana pun |
 | 📄 **Laporan** | Versi cetak / simpan PDF, unduhan JSON, dan export CSV daftar ticket |
 | 🛡️ **Aman by default** | Anti-SSRF, isolasi data antar pengguna, rate limit, header keamanan di aplikasinya sendiri |
@@ -237,6 +239,16 @@ Tombol **Buat link publik** di halaman ticket menghasilkan URL rahasia (`/r/{tok
 <img src="docs/screenshots/public-report.jpg" alt="Laporan publik yang dibagikan lewat link" width="720">
 
 Halamannya read-only, punya `noindex` supaya tidak terindeks mesin pencari, dan hanya memuat hasil scan — tidak ada tombol aksi, tidak ada data akun.
+
+### Badge untuk README
+
+Setiap laporan yang dibagikan otomatis punya badge SVG, siap ditempel di README proyekmu sendiri:
+
+```markdown
+[![API security](https://host-kamu/badge/{token}.svg)](https://host-kamu/r/{token})
+```
+
+Warnanya mengikuti skor — hijau untuk A, merah untuk F — dan ikut berubah setiap kali endpoint di-scan ulang. Mematikan link publik juga mematikan badge-nya.
 
 ---
 

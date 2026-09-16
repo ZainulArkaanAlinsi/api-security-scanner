@@ -17,6 +17,7 @@ Route::get('/', function () {
 
 // Public, read-only report shared by its owner.
 Route::get('/r/{token}', [TicketShareController::class, 'show'])->name('tickets.public');
+Route::get('/badge/{token}.svg', [TicketShareController::class, 'badge'])->name('tickets.badge');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/api-tokens', [ApiTokenController::class, 'store'])->name('api-tokens.store');
     Route::delete('/api-tokens/{token}', [ApiTokenController::class, 'destroy'])->name('api-tokens.destroy');
+    Route::post('/tickets/scan-all', [TicketScanController::class, 'scanAll'])->middleware('throttle:3,1')->name('tickets.scan-all');
     Route::post('/tickets/{ticket}/scan', [TicketScanController::class, 'scan'])->middleware('throttle:10,1')->name('tickets.scan');
     Route::get('/tickets/{ticket}/scans', [TicketScanController::class, 'history'])->name('tickets.scans');
     Route::get('/tickets/{ticket}/report', [TicketScanController::class, 'report'])->name('tickets.report');

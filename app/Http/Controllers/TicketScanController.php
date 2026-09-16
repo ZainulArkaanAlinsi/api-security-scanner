@@ -27,6 +27,26 @@ class TicketScanController extends Controller
             ->with('success', 'Scan dimulai. Halaman ini akan memperbarui dirinya sendiri saat hasilnya siap.');
     }
 
+    /**
+     * Queue a scan for every endpoint that is not already running.
+     */
+    public function scanAll(Request $request)
+    {
+        $tickets = $request->user()->tickets()
+            ->where('status', '!=', 'scanning')
+            ->limit(50)
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            $ticket->update(['status' => 'scanning']);
+            ScanTicketJob::dispatch($ticket);
+        }
+
+        return redirect()->route('tickets.index')->with('success', $tickets->isEmpty()
+            ? 'Tidak ada endpoint yang perlu di-scan.'
+            : "{$tickets->count()} endpoint masuk antrean. Hasilnya muncul satu per satu.");
+    }
+
     public function monitoring(Request $request, Ticket $ticket)
     {
         Gate::authorize('update', $ticket);

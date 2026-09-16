@@ -424,6 +424,12 @@
                 <input class="input mono" style="font-size:0.75rem" type="text" readonly
                     value="{{ route('tickets.public', $ticket->share_token) }}"
                     onclick="this.select()" aria-label="Link publik laporan">
+                <p class="hint" style="margin-top:0.9rem">Badge untuk README:</p>
+                <img src="{{ route('tickets.badge', $ticket->share_token) }}" alt="Badge skor keamanan" style="margin-top:0.4rem">
+                <input class="input mono" style="margin-top:0.4rem;font-size:0.7rem" type="text" readonly
+                    value="[![API security]({{ route('tickets.badge', $ticket->share_token) }})]({{ route('tickets.public', $ticket->share_token) }})"
+                    onclick="this.select()" aria-label="Kode Markdown badge">
+
                 <form action="{{ route('tickets.share', $ticket) }}" method="POST" style="margin-top:0.6rem">
                     @csrf
                     @method('PATCH')
