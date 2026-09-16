@@ -129,5 +129,7 @@ class ScanRunner
         }
 
         $ticket->user->notify(new ScanFindingsNotification($ticket, $new->all()));
+
+        app(WebhookNotifier::class)->notify($ticket->user, $ticket, $new->all());
     }
 }

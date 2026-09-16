@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\WebhookNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -35,6 +36,29 @@ class ProfileController extends Controller
         $user->update($data);
 
         return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function updateWebhook(Request $request, WebhookNotifier $notifier)
+    {
+        $data = $request->validateWithBag('webhook', [
+            'webhook_url' => ['nullable', 'string', 'max:512', function ($attribute, $value, $fail) {
+                if ($value && ! WebhookNotifier::isSupported($value)) {
+                    $fail('Hanya URL webhook resmi Slack (hooks.slack.com) atau Discord (discord.com/api/webhooks) yang diterima.');
+                }
+            }],
+        ]);
+
+        $request->user()->update(['webhook_url' => $data['webhook_url'] ?: null]);
+
+        if (! $data['webhook_url']) {
+            return back()->with('success', 'Webhook dimatikan. Peringatan tetap dikirim lewat email.');
+        }
+
+        $platform = WebhookNotifier::platform($data['webhook_url']);
+
+        return back()->with('success', $notifier->test($request->user())
+            ? "Webhook {$platform} tersimpan, dan pesan tes sudah dikirim."
+            : "Webhook {$platform} tersimpan, tapi pesan tes gagal dikirim. Periksa lagi URL-nya.");
     }
 
     public function updatePassword(Request $request)

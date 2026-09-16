@@ -124,7 +124,8 @@ Pilih dua tanggal, lihat persis apa yang berubah: perubahan skor, pemeriksaan ya
 | 📥 **Import OpenAPI** | Tempel satu URL spec, semua endpoint GET jadi ticket dan bisa langsung di-scan |
 | ⚡ **Antrean** | Scan dikerjakan worker di latar belakang, request web tidak pernah menunggu |
 | 📈 **Riwayat & perbandingan** | Grafik tren skor, dan perbandingan dua scan berdampingan per pemeriksaan |
-| 🔔 **Monitoring otomatis** | Scan ulang tiap 6 jam, email peringatan hanya untuk temuan high/critical yang benar-benar baru |
+| 🔔 **Monitoring otomatis** | Scan ulang tiap 6 jam, peringatan hanya untuk temuan high/critical yang benar-benar baru |
+| 💬 **Slack & Discord** | Peringatan yang sama dikirim ke channel tim, bukan cuma email |
 | 🔗 **Link laporan publik** | Bagikan hasil scan lewat URL rahasia, tanpa perlu akun. Bisa dimatikan kapan saja |
 | 🏷️ **Badge skor** | SVG bergaya shields.io berisi grade API-mu, siap ditempel di README proyek |
 | 🚀 **Scan massal** | Satu tombol untuk mengantrekan scan seluruh endpoint sekaligus |
@@ -196,7 +197,9 @@ php artisan schedule:work                # lokal
 # di server: * * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-`scan:due --hours=2` berjalan tiap 6 jam. Email hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumnya**, jadi tidak ada spam untuk masalah yang sama.
+`scan:due --hours=2` berjalan tiap 6 jam. Peringatan hanya dikirim untuk temuan **high/critical yang belum ada di scan sebelumnya**, jadi tidak ada spam untuk masalah yang sama.
+
+Selain email, hasilnya bisa dikirim ke **Slack atau Discord**: tempel URL incoming webhook di halaman Profil, dan pesan tes langsung dikirim untuk memastikan sambungannya benar. Hanya domain resmi kedua layanan yang diterima — kolom URL bebas akan membuka celah SSRF baru.
 
 ---
 

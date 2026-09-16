@@ -104,6 +104,37 @@
 
     <section class="section">
         <div class="section-intro">
+            <h2>Notifikasi Slack / Discord</h2>
+            <p>Peringatan temuan berisiko tinggi dikirim ke channel tim, bukan cuma ke email.</p>
+        </div>
+        <form action="{{ route('profile.webhook') }}" method="POST" class="card card-pad" novalidate>
+            @csrf
+            @method('PUT')
+
+            <div class="field {{ $errors->webhook->has('webhook_url') ? 'has-error' : '' }}">
+                <label class="label" for="webhook_url">URL webhook</label>
+                <input class="input mono" style="font-size:0.8rem" type="url" id="webhook_url" name="webhook_url"
+                    value="{{ old('webhook_url', $user->webhook_url) }}"
+                    placeholder="https://hooks.slack.com/services/..."
+                    aria-describedby="webhook-hint @error('webhook_url', 'webhook') webhook-error @enderror"
+                    @error('webhook_url', 'webhook') aria-invalid="true" @enderror>
+                @error('webhook_url', 'webhook')
+                    <p class="error" id="webhook-error">{{ $message }}</p>
+                @enderror
+                <p class="hint" id="webhook-hint">
+                    Slack: <span class="mono">hooks.slack.com/services/…</span> · Discord: <span class="mono">discord.com/api/webhooks/…</span><br>
+                    Kosongkan untuk mematikan. Menyimpan URL baru otomatis mengirim pesan tes.
+                </p>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top:1.25rem">
+                {{ $user->webhook_url ? 'Perbarui webhook' : 'Hubungkan' }}
+            </button>
+        </form>
+    </section>
+
+    <section class="section">
+        <div class="section-intro">
             <h2>API token</h2>
             <p>Untuk menjalankan scan dari pipeline CI/CD.</p>
         </div>
