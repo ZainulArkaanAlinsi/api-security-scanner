@@ -26,7 +26,7 @@
         .ring-inner { width: 82px; height: 82px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; line-height: 1.1; }
         .ring-grade { font-size: 1.8rem; font-weight: 600; }
         .ring-score { font-size: 0.75rem; color: var(--ink-soft); }
-        .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+        .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 1.5rem; border-top: 1px solid var(--line); }
         .summary > div { padding: 0.9rem 0; }
         .summary dt { font-size: 0.75rem; color: var(--ink-faint); }
         .summary dd { margin-top: 0.2rem; font-weight: 500; }

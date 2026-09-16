@@ -177,6 +177,8 @@ https://petstore3.swagger.io/api/v3/openapi.json
 
 Semua operasi `GET` jadi ticket (maksimal 50 sekali impor), parameter seperti `/pet/{petId}` diisi `1`, endpoint yang sudah ada dilewati, dan bisa langsung di-scan semuanya.
 
+<img src="docs/screenshots/import-openapi.jpg" alt="Halaman import OpenAPI" width="720">
+
 ### Monitoring otomatis
 
 Aktifkan lewat tombol di halaman ticket, lalu jalankan penjadwal:
@@ -231,6 +233,10 @@ Contoh di GitHub Actions — gagalkan build kalau skornya jeblok:
 ## Berbagi laporan
 
 Tombol **Buat link publik** di halaman ticket menghasilkan URL rahasia (`/r/{token}`) yang bisa dibuka tanpa login — enak untuk dikirim ke klien atau tim. Mematikan lalu menyalakannya lagi menerbitkan link baru, sehingga link lama langsung mati.
+
+<img src="docs/screenshots/public-report.jpg" alt="Laporan publik yang dibagikan lewat link" width="720">
+
+Halamannya read-only, punya `noindex` supaya tidak terindeks mesin pencari, dan hanya memuat hasil scan — tidak ada tombol aksi, tidak ada data akun.
 
 ---
 
