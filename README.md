@@ -2,6 +2,14 @@
 
 Aplikasi web Laravel untuk mengaudit konfigurasi keamanan endpoint API. Tambahkan URL, jalankan scan, dan dapatkan daftar temuan yang diurutkan berdasarkan tingkat risiko beserta cara memperbaikinya.
 
+## Tampilan
+
+| Dashboard | Hasil scan |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.jpg) | ![Detail hasil scan](docs/screenshots/scan-detail.jpg) |
+
+![Halaman login](docs/screenshots/login.jpg)
+
 ## Fitur
 
 - **Scanner keamanan**: hingga 12 pemeriksaan per scan
