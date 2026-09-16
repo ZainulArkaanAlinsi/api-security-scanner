@@ -50,4 +50,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ticket::class);
     }
+
+    public function apiTokens()
+    {
+        return $this->hasMany(ApiToken::class);
+    }
 }

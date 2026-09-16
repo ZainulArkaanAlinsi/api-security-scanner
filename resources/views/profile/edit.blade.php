@@ -104,6 +104,61 @@
 
     <section class="section">
         <div class="section-intro">
+            <h2>API token</h2>
+            <p>Untuk menjalankan scan dari pipeline CI/CD.</p>
+        </div>
+        <div>
+            @if (session('new_api_token'))
+                <div class="alert alert-success" style="display:block;margin-bottom:1rem">
+                    <p style="font-weight:500">Token dibuat. Salin sekarang — tidak akan ditampilkan lagi.</p>
+                    <input class="input mono" style="margin-top:0.6rem;font-size:0.8rem" type="text" readonly
+                        value="{{ session('new_api_token') }}" onclick="this.select()" aria-label="Token baru">
+                </div>
+            @endif
+
+            <form action="{{ route('api-tokens.store') }}" method="POST" class="card card-pad">
+                @csrf
+                <div class="field {{ $errors->token->has('name') ? 'has-error' : '' }}">
+                    <label class="label" for="token_name">Nama token</label>
+                    <input class="input" type="text" id="token_name" name="name" placeholder="GitHub Actions" required maxlength="60">
+                    @error('name', 'token')<p class="error">{{ $message }}</p>@enderror
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem">Buat token</button>
+            </form>
+
+            @if ($apiTokens->isNotEmpty())
+                <div class="card" style="margin-top:1rem">
+                    @foreach ($apiTokens as $token)
+                        <div class="row" style="justify-content:space-between;padding:0.8rem 1.25rem;border-bottom:1px solid var(--line)">
+                            <div>
+                                <div style="font-size:0.9rem">{{ $token->name }}</div>
+                                <div class="faint mono" style="font-size:0.75rem">
+                                    {{ $token->preview() }} · {{ $token->last_used_at ? 'dipakai '.$token->last_used_at->diffForHumans() : 'belum pernah dipakai' }}
+                                </div>
+                            </div>
+                            <form action="{{ route('api-tokens.destroy', $token) }}" method="POST"
+                                data-confirm="Hapus token &quot;{{ $token->name }}&quot;? Pipeline yang memakainya akan langsung ditolak.">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-ghost btn-sm">Hapus</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <details style="margin-top:1rem">
+                <summary style="cursor:pointer;font-size:0.875rem;color:var(--ink-soft)">Contoh pemakaian di GitHub Actions</summary>
+                <pre class="card card-pad mono" style="margin-top:0.6rem;font-size:0.75rem;overflow-x:auto">curl -X POST {{ url('/api/v1/scans') }} \
+  -H "Authorization: Bearer $API_SCANNER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://api.domainkamu.com/v1/health"}'</pre>
+            </details>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-intro">
             <h2>Hapus akun</h2>
             <p>Akun, semua ticket, dan hasil scan akan dihapus permanen.</p>
         </div>

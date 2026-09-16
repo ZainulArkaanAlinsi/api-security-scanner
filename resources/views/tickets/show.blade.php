@@ -416,6 +416,32 @@
             </form>
         </div>
 
+        @if ($ticket->status === 'completed')
+        <div class="card card-pad">
+            <h2>Bagikan laporan</h2>
+            @if ($ticket->share_token)
+                <p class="muted" style="margin:0.35rem 0 0.7rem;font-size:0.85rem">Aktif. Siapa pun yang punya link ini bisa melihat laporannya tanpa login.</p>
+                <input class="input mono" style="font-size:0.75rem" type="text" readonly
+                    value="{{ route('tickets.public', $ticket->share_token) }}"
+                    onclick="this.select()" aria-label="Link publik laporan">
+                <form action="{{ route('tickets.share', $ticket) }}" method="POST" style="margin-top:0.6rem">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="share" value="0">
+                    <button type="submit" class="btn btn-ghost btn-block">Matikan link</button>
+                </form>
+            @else
+                <p class="muted" style="margin:0.35rem 0 0.9rem;font-size:0.85rem">Buat link rahasia supaya tim atau klien bisa melihat hasil ini tanpa perlu akun.</p>
+                <form action="{{ route('tickets.share', $ticket) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="share" value="1">
+                    <button type="submit" class="btn btn-secondary btn-block">Buat link publik</button>
+                </form>
+            @endif
+        </div>
+        @endif
+
         <div class="card card-pad">
             <h2>Laporan</h2>
             <p class="muted" style="margin:0.35rem 0 0.9rem;font-size:0.85rem">Cetak atau simpan sebagai PDF untuk dibagikan, atau unduh JSON untuk arsip dan otomasi.</p>

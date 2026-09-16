@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -7,11 +8,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketImportController;
 use App\Http\Controllers\TicketScanController;
+use App\Http\Controllers\TicketShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return auth()->check() ? redirect()->route('tickets.index') : view('welcome');
 })->name('home');
+
+// Public, read-only report shared by its owner.
+Route::get('/r/{token}', [TicketShareController::class, 'show'])->name('tickets.public');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -43,6 +48,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/tickets/import', [TicketImportController::class, 'store'])->middleware('throttle:5,1');
     Route::resource('tickets', TicketController::class);
     Route::patch('/tickets/{ticket}/monitoring', [TicketScanController::class, 'monitoring'])->name('tickets.monitoring');
+    Route::patch('/tickets/{ticket}/share', [TicketShareController::class, 'update'])->name('tickets.share');
+
+    Route::post('/api-tokens', [ApiTokenController::class, 'store'])->name('api-tokens.store');
+    Route::delete('/api-tokens/{token}', [ApiTokenController::class, 'destroy'])->name('api-tokens.destroy');
     Route::post('/tickets/{ticket}/scan', [TicketScanController::class, 'scan'])->middleware('throttle:10,1')->name('tickets.scan');
     Route::get('/tickets/{ticket}/scans', [TicketScanController::class, 'history'])->name('tickets.scans');
     Route::get('/tickets/{ticket}/report', [TicketScanController::class, 'report'])->name('tickets.report');

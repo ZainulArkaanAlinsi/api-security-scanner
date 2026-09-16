@@ -17,6 +17,7 @@ class ProfileController extends Controller
             'user' => $user,
             'ticketCount' => $user->tickets()->count(),
             'scanCount' => $user->tickets()->whereNotNull('scanned_at')->count(),
+            'apiTokens' => $user->apiTokens()->latest()->get(),
         ]);
     }
 

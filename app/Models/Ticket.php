@@ -19,6 +19,7 @@ class Ticket extends Model
         'auto_scan',
         'score',
         'grade',
+        'share_token',
     ];
 
     protected $casts = [
