@@ -133,6 +133,19 @@
 
         .footer { border-top: 1px solid var(--line); padding: 1.25rem 0; font-size: 0.8rem; color: var(--ink-faint); }
 
+        dialog {
+            width: min(420px, calc(100vw - 2rem));
+            padding: 1.35rem;
+            color: var(--ink);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.45);
+        }
+        dialog::backdrop { background: rgb(0 0 0 / 0.45); }
+        dialog h2 { font-size: 1.05rem; }
+        dialog p { margin-top: 0.45rem; color: var(--ink-soft); font-size: 0.9rem; }
+
         @media (max-width: 640px) {
             .menu-name { display: none; }
             .topbar-inner { gap: 0.75rem; }
@@ -200,6 +213,15 @@
 
     <p id="busy-status" class="sr-only" role="status" aria-live="polite"></p>
 
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+        <h2 id="confirm-title">Konfirmasi</h2>
+        <p id="confirm-message"></p>
+        <div class="row" style="justify-content:flex-end;margin-top:1.25rem">
+            <button type="button" class="btn btn-secondary" value="cancel" data-confirm-cancel>Batal</button>
+            <button type="button" class="btn btn-danger" data-confirm-ok>Ya, lanjutkan</button>
+        </div>
+    </dialog>
+
     <footer class="footer">
         <div class="container">&copy; {{ date('Y') }} API Scanner</div>
     </footer>
@@ -226,10 +248,38 @@
             });
         });
 
+        // Themed confirmation instead of window.confirm, with focus returned
+        // to the button that opened it.
+        const dialog = document.getElementById('confirm-dialog');
+        const dialogMessage = document.getElementById('confirm-message');
+        let pendingForm = null;
+        let opener = null;
+
         document.querySelectorAll('form[data-confirm]').forEach((form) => {
             form.addEventListener('submit', (event) => {
-                if (!confirm(form.dataset.confirm)) event.preventDefault();
+                if (form.dataset.confirmed === 'yes') return;
+
+                event.preventDefault();
+                pendingForm = form;
+                opener = document.activeElement;
+                dialogMessage.textContent = form.dataset.confirm;
+                dialog.showModal();
             });
+        });
+
+        dialog.querySelector('[data-confirm-ok]').addEventListener('click', () => {
+            dialog.close();
+            if (pendingForm) {
+                pendingForm.dataset.confirmed = 'yes';
+                pendingForm.requestSubmit();
+            }
+        });
+
+        dialog.querySelector('[data-confirm-cancel]').addEventListener('click', () => dialog.close());
+
+        dialog.addEventListener('close', () => {
+            opener?.focus();
+            pendingForm = null;
         });
 
         // Keep the button focusable while it works: disabling it would drop focus

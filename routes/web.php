@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('tickets', TicketController::class);
     Route::patch('/tickets/{ticket}/monitoring', [TicketScanController::class, 'monitoring'])->name('tickets.monitoring');
     Route::post('/tickets/{ticket}/scan', [TicketScanController::class, 'scan'])->middleware('throttle:10,1')->name('tickets.scan');
+    Route::get('/tickets/{ticket}/scans', [TicketScanController::class, 'history'])->name('tickets.scans');
     Route::get('/tickets/{ticket}/report', [TicketScanController::class, 'report'])->name('tickets.report');
     Route::get('/tickets/{ticket}/print', [TicketScanController::class, 'print'])->name('tickets.print');
 });

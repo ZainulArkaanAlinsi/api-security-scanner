@@ -40,6 +40,16 @@ class TicketScanController extends Controller
             : 'Monitoring otomatis dimatikan.');
     }
 
+    public function history(Ticket $ticket)
+    {
+        Gate::authorize('view', $ticket);
+
+        return view('tickets.scans', [
+            'ticket' => $ticket,
+            'scans' => $ticket->scans()->orderByDesc('id')->paginate(25),
+        ]);
+    }
+
     public function report(Ticket $ticket)
     {
         Gate::authorize('view', $ticket);

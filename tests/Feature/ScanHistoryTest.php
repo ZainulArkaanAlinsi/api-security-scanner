@@ -130,6 +130,29 @@ class ScanHistoryTest extends TestCase
         $this->actingAs(User::factory()->create())->get(route('tickets.print', $ticket))->assertNotFound();
     }
 
+    public function test_full_history_is_paginated_and_owner_only(): void
+    {
+        [$user, $ticket] = $this->ticket();
+
+        foreach (range(1, 30) as $i) {
+            $ticket->scans()->create(['status' => 'completed', 'severity' => 'low', 'findings' => [], 'result' => []]);
+        }
+
+        $this->actingAs($user)->get(route('tickets.show', $ticket))
+            ->assertOk()
+            ->assertSee('Lihat semua 30 scan');
+
+        $this->actingAs($user)->get(route('tickets.scans', $ticket))
+            ->assertOk()
+            ->assertSee('Riwayat scan')
+            ->assertSee('30 total')
+            ->assertSee('Berikutnya');
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('tickets.scans', $ticket))
+            ->assertNotFound();
+    }
+
     public function test_demo_seeder_builds_dashboard_ready_data(): void
     {
         $this->seed(DemoSeeder::class);

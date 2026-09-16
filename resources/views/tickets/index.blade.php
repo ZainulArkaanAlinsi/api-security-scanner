@@ -52,6 +52,24 @@
         .stat:nth-child(3) { border-left: 0; }
         .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
     }
+
+    /* Below this width the table becomes one card per ticket, so nothing
+       important hides behind a horizontal scrollbar. */
+    @media (max-width: 640px) {
+        .table thead { display: none; }
+        .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+        .table tr { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--line); }
+        .table td { padding: 0; border: 0; }
+        .table td + td { margin-top: 0.5rem; }
+        .table td[data-label] { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+        .table td[data-label]::before {
+            content: attr(data-label);
+            font-size: 0.75rem;
+            color: var(--ink-faint);
+        }
+        .table td.num { text-align: left; }
+        .t-title, .t-url { max-width: none; }
+    }
 </style>
 @endpush
 
@@ -182,15 +200,15 @@
                                     <div class="t-url mono truncate">{{ $ticket->api_url }}</div>
                                 </a>
                             </td>
-                            <td>@include('tickets.partials.status', ['status' => $ticket->status])</td>
-                            <td>
+                            <td data-label="Status">@include('tickets.partials.status', ['status' => $ticket->status])</td>
+                            <td data-label="Risiko">
                                 @if ($ticket->severity)
                                     <span class="sev sev-{{ $ticket->severity }}">{{ ucfirst($ticket->severity) }}</span>
                                 @else
                                     <span class="faint">—</span>
                                 @endif
                             </td>
-                            <td class="muted" style="white-space:nowrap">
+                            <td class="muted" data-label="Scan terakhir" style="white-space:nowrap">
                                 {{ $ticket->scanned_at ? $ticket->scanned_at->diffForHumans() : 'Belum pernah' }}
                             </td>
                             <td class="num">
