@@ -10,6 +10,8 @@ Aplikasi ini butuh **tiga proses** dari satu image yang sama:
 
 Tanpa worker, ticket akan berhenti di status "Sedang scan". Karena itu platform yang hanya menjalankan satu proses web (Vercel, Netlify, shared hosting biasa) tidak cocok.
 
+> Mencari opsi **gratis**? Railway dan Fly.io sama-sama berbayar sejak tier gratisnya dihentikan. Untuk VM gratis selamanya, lihat **[DEPLOY-ORACLE.md](DEPLOY-ORACLE.md)**.
+
 ---
 
 ## Railway (paling mudah)

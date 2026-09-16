@@ -222,7 +222,10 @@ docker compose up --build     # jalankan versi production di komputer sendiri
 fly deploy                    # atau ke Fly.io
 ```
 
-Panduan lengkap untuk **Railway** dan **Fly.io**, termasuk daftar variabel dan checklist setelah deploy: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Panduan lengkap:
+
+- **[docs/DEPLOY-ORACLE.md](docs/DEPLOY-ORACLE.md)** — VM Oracle Cloud Always Free (gratis selamanya), satu skrip sampai jalan
+- **[docs/DEPLOY.md](docs/DEPLOY.md)** — Railway dan Fly.io, termasuk daftar variabel dan checklist setelah deploy
 
 > Platform yang hanya menjalankan satu proses web (Vercel, Netlify, shared hosting) tidak cocok, karena scan dikerjakan oleh worker terpisah.
 
