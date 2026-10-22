@@ -10,7 +10,12 @@ COPY resources ./resources
 RUN npm run build
 
 # ---------- 2. Application ----------
-FROM dunglas/frankenphp:1-php8.3
+# Pinned to the patched release (2026-10-22): PHP 8.3.36 fixes CVE-2026-109618 and
+# CVE-2026-109619 (unauthenticated RCE, php.net 2026-10-21). Bump deliberately.
+FROM dunglas/frankenphp:1.13.2-php8.3.36
+
+# Fail the build if the image ever carries an unpatched PHP.
+RUN php -r 'exit(version_compare(PHP_VERSION, "8.3.36", "<") ? 1 : 0);'
 
 # pcntl is what lets the queue worker handle restart/timeout signals.
 RUN install-php-extensions pdo_mysql pdo_pgsql pdo_sqlite intl zip opcache pcntl
